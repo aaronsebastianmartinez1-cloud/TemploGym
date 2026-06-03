@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TemploGym — El Templo de tu Transformación</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:        #c9a84c;
+      --gold-bright: #e8c46a;
+      --gold-dim:    #7a6028;
+      --gold-glow:   rgba(201,168,76,0.15);
+      --gold-glow2:  rgba(201,168,76,0.08);
+      --bg-deep:     #080808;
+      --bg-main:     #0f0f0f;
+      --bg-card:     #161616;
+      --bg-elevated: #1e1e1e;
+      --text:        #f0ece0;
+      --text-muted:  #888880;
+      --muted:       #444440;
+      --border:      rgba(201,168,76,0.15);
+      --border-solid:#222222;
+      --red:         #e05555;
+      --green:       #5cb85c;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ─── LANDING WRAPPER ─── */
+    #landing {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── NAVBAR ─── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 60px;
+      height: 72px;
+      background: rgba(8,8,8,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .nav-logo .bolt {
+      font-size: 26px;
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%,100% { text-shadow: 0 0 10px var(--gold); }
+      50%      { text-shadow: 0 0 22px var(--gold-bright); }
+    }
+
+    .nav-logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .nav-logo-main {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 20px;
+      letter-spacing: 4px;
+      color: var(--gold);
+    }
+
+    .nav-logo-sub {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 9px;
+      letter-spacing: 6px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--gold); }
+
+    .nav-cta {
+      padding: 9px 24px;
+      background: transparent;
+      border: 1.5px solid var(--gold);
+      color: var(--gold) !important;
+      border-radius: 4px;
+      font-family: 'Bebas Neue', sans-serif !important;
+      font-size: 16px !important;
+      letter-spacing: 2px !important;
+      transition: all 0.2s !important;
+      cursor: pointer;
+    }
+
+    .nav-cta:hover {
+      background: var(--gold) !important;
+      color: #080808 !important;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding-top: 72px;
+    }
+
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(105deg, rgba(8,8,8,0.97) 0%, rgba(8,8,8,0.7) 50%, rgba(8,8,8,0.4) 100%),
+        url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1800&q=80') center/cover no-repeat;
+    }
+
+    .hero-bg::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 200px;
+      background: linear-gradient(to top, var(--bg-deep), transparent);
+    }
+
+    /* Noise texture overlay */
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 0 60px;
+      max-width: 900px;
+    }
+
+    .hero-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .hero-eyebrow-line {
+      width: 40px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .hero-eyebrow-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .hero-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(64px, 10vw, 120px);
+      line-height: 0.9;
+      letter-spacing: 2px;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .hero-title .gold { color: var(--gold); }
+    .hero-title .stroke {
+      -webkit-text-stroke: 1px var(--gold-dim);
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      font-weight: 300;
+      max-width: 480px;
+      line-height: 1.7;
+      margin: 24px 0 40px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-hero-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      background: var(--gold);
+      color: #080808;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-hero-primary:hover {
+      background: var(--gold-bright);
+      transform: translateY(-2px);
+    }
+
+    .btn-hero-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 36px;
+      background: transparent;
+      color: var(--text);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 2px;
+      border: 1px solid var(--muted);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-hero-secondary:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* Stats bar */
+    .hero-stats {
+      position: absolute;
+      bottom: 60px;
+      left: 60px;
+      right: 60px;
+      display: flex;
+      gap: 0;
+      z-index: 1;
+    }
+
+    .hero-stat {
+      flex: 1;
+      padding: 24px 32px;
+      border-left: 1px solid var(--border);
+      text-align: center;
+    }
+
+    .hero-stat:first-child { border-left: none; }
+
+    .hero-stat-num {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 42px;
+      color: var(--gold);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .hero-stat-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 4px;
+    }
+
+    /* ─── FEATURES ─── */
+    .features {
+      padding: 120px 60px;
+      background: var(--bg-main);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(36px, 5vw, 56px);
+      letter-spacing: 2px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .section-title .accent { color: var(--gold); }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--border-solid);
+    }
+
+    .feature-item {
+      background: var(--bg-card);
+      padding: 48px 40px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .feature-item::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      transform: scaleX(0);
+      transition: transform 0.4s;
+    }
+
+    .feature-item:hover { background: var(--bg-elevated); }
+    .feature-item:hover::before { transform: scaleX(1); }
+
+    .feature-icon {
+      width: 52px; height: 52px;
+      background: var(--gold-glow2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      color: var(--gold);
+      margin-bottom: 24px;
+    }
+
+    .feature-num {
+      position: absolute;
+      top: 32px; right: 32px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 56px;
+      color: rgba(201,168,76,0.06);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+
+    .feature-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+
+    .feature-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ─── PLANES ─── */
+    .plans-section {
+      padding: 120px 60px;
+      background: var(--bg-deep);
+      position: relative;
+    }
+
+    .plans-section::before {
+      content: 'PLANES';
+      position: absolute;
+      top: 60px; left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 180px;
+      color: rgba(201,168,76,0.03);
+      letter-spacing: 20px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-top: 60px;
+      position: relative;
+    }
+
+    .plan-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-solid);
+      border-radius: 12px;
+      padding: 40px 36px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .plan-box:hover {
+      border-color: var(--gold-dim);
+      transform: translateY(-4px);
+    }
+
+    .plan-box.featured {
+      background: linear-gradient(160deg, var(--bg-card), rgba(201,168,76,0.04));
+      border-color: var(--gold);
+    }
+
+    .plan-popular {
+      position: absolute;
+      top: 20px; right: 20px;
+      background: var(--gold);
+      color: #080808;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 12px;
+      letter-spacing: 2px;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .plan-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 13px;
+      letter-spacing: 4px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .plan-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .plan-currency {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px;
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    .plan-price {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 62px;
+      color: var(--gold);
+      letter-spacing: 1px;
+      line-height: 1;
+    }
+
+    .plan-period {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .plan-divider {
+      height: 1px;
+      background: var(--border-solid);
+      margin: 24px 0;
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .plan-features li i {
+      color: var(--gold);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .btn-plan {
+      width: 100%;
+      padding: 13px;
+      background: transparent;
+      border: 1px solid var(--border-solid);
+      color: var(--text-muted);
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 16px;
+      letter-spacing: 2px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-plan:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-plan.featured-btn {
+      background: var(--gold);
+      color: #080808;
+      border-color: var(--gold);
+    }
+
+    .btn-plan.featured-btn:hover {
+      background: var(--gold-bright);
+    }
+
+    /* ─── CLASES ─── */
+    .classes-section {
+      padding: 120px 60px;
+      background: var(--bg-main);
+    }
+
+    .classes-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-top: 60px;
+    }
+
+    .class-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-solid);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .class-card:hover { border-color: var(--gold-dim); transform: translateY(-3px); }
+
+    .class-img {
+      height: 180px;
+      background: var(--bg-elevated);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: var(--gold-dim);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .class-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    }
+
+    .class-tag {
+      position: absolute;
+      top: 12px; left: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .tag-fuerza { background: rgba(201,168,76,0.2); color: var(--gold); border: 1px solid var(--border); }
+    .tag-cardio { background: rgba(224,85,85,0.2); color: #e05555; border: 1px solid rgba(224,85,85,0.3); }
+    .tag-funcional { background: rgba(91,155,213,0.2); color: #5b9bd5; border: 1px solid rgba(91,155,213,0.3); }
+    .tag-yoga { background: rgba(92,184,92,0.2); color: #5cb85c; border: 1px solid rgba(92,184,92,0.3); }
+
+    .class-body { padding: 20px; }
+
+    .class-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .class-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 14px;
+    }
+
+    .class-meta {
+      display: flex;
+      gap: 14px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .class-meta span { display: flex; align-items: center; gap: 4px; }
+    .class-meta i { color: var(--gold); }
+
+    /* ─── LOGIN SECTION ─── */
+    .login-section {
+      padding: 120px 60px;
+      background: var(--bg-deep);
+      display: flex;
+      align-items: center;
+      gap: 80px;
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .login-section::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .login-left {
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .login-eyebrow {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .login-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(48px, 6vw, 72px);
+      line-height: 0.95;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+    }
+
+    .login-title span { color: var(--gold); }
+
+    .login-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 380px;
+    }
+
+    .login-right {
+      flex: 0 0 420px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 40px;
+      position: relative;
+    }
+
+    .login-right::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 32px; right: 32px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .login-bolt {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 12px;
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+
+    .login-brand {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 28px;
+      letter-spacing: 5px;
+      color: var(--gold);
+    }
+
+    .login-tagline {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+    }
+
+    .login-form { display: flex; flex-direction: column; gap: 20px; }
+
+    .login-field { display: flex; flex-direction: column; gap: 6px; }
+
+    .login-field label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .login-field-wrap {
+      position: relative;
+    }
+
+    .login-field-wrap i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .login-field input {
+      width: 100%;
+      padding: 12px 14px 12px 42px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border-solid);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .login-field input:focus {
+      border-color: var(--gold-dim);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
+    }
+
+    .login-field input:focus + i,
+    .login-field-wrap:focus-within i {
+      color: var(--gold);
+    }
+
+    .login-forgot {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+      margin-top: -10px;
+    }
+
+    .login-forgot:hover { color: var(--gold); }
+
+    .btn-login {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      color: #080808;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 18px;
+      letter-spacing: 3px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-login:hover {
+      background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+      box-shadow: 0 6px 24px rgba(201,168,76,0.35);
+      transform: translateY(-1px);
+    }
+
+    .login-error {
+      display: none;
+      background: rgba(224,85,85,0.1);
+      border: 1px solid rgba(224,85,85,0.3);
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #e05555;
+      text-align: center;
+    }
+
+    .login-error.show { display: block; }
+
+    .login-demo-hint {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .login-demo-hint span { color: var(--gold-dim); }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      background: var(--bg-main);
+      border-top: 1px solid var(--border);
+      padding: 60px;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand-name {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 26px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .footer-brand-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 280px;
+    }
+
+    .footer-socials {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .footer-social {
+      width: 36px; height: 36px;
+      border: 1px solid var(--border-solid);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .footer-social:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .footer-col-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 12px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .footer-col-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col-links a {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-col-links a:hover { color: var(--text); }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border-solid);
+      padding-top: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-copy {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .footer-copy span { color: var(--gold-dim); }
+
+    /* ─── ADMIN WRAPPER (sistema existente) ─── */
+    #adminWrapper {
+      display: none;
+    }
+
+    #adminWrapper.active {
+      display: block;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── DIVIDER ─── */
+    .gold-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+      margin: 0 auto;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1100px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .classes-grid  { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid   { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 800px) {
+      .navbar       { padding: 0 20px; }
+      .hero-content { padding: 0 20px; }
+      .hero-stats   { display: none; }
+      .features     { padding: 80px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .plans-section { padding: 80px 20px; }
+      .plans-grid   { grid-template-columns: 1fr; }
+      .classes-section { padding: 80px 20px; }
+      .classes-grid  { grid-template-columns: 1fr; }
+      .login-section { flex-direction: column; padding: 80px 20px; gap: 40px; }
+      .login-right  { flex: none; width: 100%; }
+      .footer       { padding: 40px 20px; }
+      .footer-grid  { grid-template-columns: 1fr; gap: 32px; }
+      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+      .nav-links    { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════════ -->
+<div id="landing">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="#" class="nav-logo">
+      <span class="bolt">⚡</span>
+      <div class="nav-logo-text">
+        <span class="nav-logo-main">TEMPLO</span>
+        <span class="nav-logo-sub">GYM</span>
+      </div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#inicio">Inicio</a></li>
+      <li><a href="#clases">Clases</a></li>
+      <li><a href="#planes">Planes</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+      <li><a href="#acceso" class="nav-cta">INSCRÍBETE</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <div class="hero-eyebrow-line"></div>
+        <span class="hero-eyebrow-text">Chincha - Chincha Alta — Desde 2019</span>
+      </div>
+      <h1 class="hero-title">
+        FORJA TU<br/>
+        <span class="gold">MEJOR</span><br/>
+        <span class="stroke">VERSIÓN</span>
+      </h1>
+      <p class="hero-subtitle">
+        Más que un gimnasio. Un templo donde el hierro y la disciplina esculpen el carácter. Entrena con los mejores, supera tus límites.
+      </p>
+      <div class="hero-actions">
+        <a href="#planes" class="btn-hero-primary">
+          <i class="fas fa-bolt"></i> VER PLANES
+        </a>
+        <a href="#clases" class="btn-hero-secondary">
+          <i class="fas fa-play"></i> NUESTRAS CLASES
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-num">500+</div>
+        <div class="hero-stat-label">Miembros Activos</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">12</div>
+        <div class="hero-stat-label">Coaches Certificados</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">5</div>
+        <div class="hero-stat-label">Años de Experiencia</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">2,400m²</div>
+        <div class="hero-stat-label">Área de Entrenamiento</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- FEATURES -->
+  <section class="features" id="nosotros">
+    <div class="section-header">
+      <p class="section-eyebrow">¿Por qué elegirnos?</p>
+      <h2 class="section-title">EL TEMPLO <span class="accent">TIENE TODO</span></h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-item fade-up">
+        <span class="feature-num">01</span>
+        <div class="feature-icon"><i class="fas fa-dumbbell"></i></div>
+        <h3 class="feature-title">Equipamiento Premium</h3>
+        <p class="feature-desc">Más de 200 máquinas y estaciones de peso libre. Tecnología Life Fitness, Hammer Strength y Technogym para entrenamientos de nivel élite.</p>
+      </div>
+      <div class="feature-item fade-up" style="transition-delay:0.1s">
+        <span class="feature-num">02</span>
+        <div class="feature-icon"><i class="fas fa-users"></i></div>
+        <h3 class="feature-title">Coaches Especializados</h3>
+        <p class="feature-desc">Entrenadores certificados internacionalmente con experiencia en competiciones. Asesoría personalizada en nutrición, fuerza e hipertrofia.</p>
+      </div>
+      <div class="feature-item fade-up" style="transition-delay:0.2s">
+        <span class="feature-num">03</span>
+        <div class="feature-icon"><i class="fas fa-clock"></i></div>
+        <h3 class="feature-title">Horario Extendido</h3>
+        <p class="feature-desc">Abierto de 5AM a 11PM todos los días. Porque la disciplina no tiene horario. Mañana, tarde o noche — el templo siempre está listo para ti.</p>
+      </div>
+      <div class="feature-item fade-up" style="transition-delay:0.3s">
+        <span class="feature-num">04</span>
+        <div class="feature-icon"><i class="fas fa-shower"></i></div>
+        <h3 class="feature-title">Instalaciones Top</h3>
+        <p class="feature-desc">Vestuarios modernos con duchas calientes, casilleros digitales, zona de hidratación con agua purificada y área de recuperación con crioterapia.</p>
+      </div>
+      <div class="feature-item fade-up" style="transition-delay:0.4s">
+        <span class="feature-num">05</span>
+        <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+        <h3 class="feature-title">App & Seguimiento</h3>
+        <p class="feature-desc">Controla tu asistencia, rutinas y progreso desde nuestra plataforma digital. Historial completo de entrenamientos y métricas de avance.</p>
+      </div>
+      <div class="feature-item fade-up" style="transition-delay:0.5s">
+        <span class="feature-num">06</span>
+        <div class="feature-icon"><i class="fas fa-fire-alt"></i></div>
+        <h3 class="feature-title">Comunidad Real</h3>
+        <p class="feature-desc">Más de 500 miembros que se apoyan y motivan mutuamente. Retos mensuales, eventos y la cultura del esfuerzo compartido que define al Templo.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- CLASES -->
+  <section class="classes-section" id="clases">
+    <div class="section-header">
+      <p class="section-eyebrow">Disciplinas</p>
+      <h2 class="section-title">ELIGE TU <span class="accent">BATALLA</span></h2>
+    </div>
+
+    <div class="classes-grid">
+      <div class="class-card fade-up">
+        <div class="class-img">
+          <i class="fas fa-dumbbell"></i>
+          <div class="class-img-overlay"></div>
+          <span class="class-tag tag-fuerza">Fuerza</span>
+        </div>
+        <div class="class-body">
+          <h4 class="class-name">Powerlifting</h4>
+          <p class="class-desc">Los tres grandes: sentadilla, press de banca y peso muerto. Técnica y progresión garantizada.</p>
+          <div class="class-meta">
+            <span><i class="fas fa-clock"></i> 90 min</span>
+            <span><i class="fas fa-signal"></i> Todos los niveles</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="class-card fade-up" style="transition-delay:0.1s">
+        <div class="class-img" style="color: #e05555">
+          <i class="fas fa-running"></i>
+          <div class="class-img-overlay"></div>
+          <span class="class-tag tag-cardio">Cardio</span>
+        </div>
+        <div class="class-body">
+          <h4 class="class-name">HIIT Extremo</h4>
+          <p class="class-desc">Intervalos de alta intensidad que queman grasa y disparan tu metabolismo en 45 minutos.</p>
+          <div class="class-meta">
+            <span><i class="fas fa-clock"></i> 45 min</span>
+            <span><i class="fas fa-signal"></i> Intermedio</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="class-card fade-up" style="transition-delay:0.2s">
+        <div class="class-img" style="color: #5b9bd5">
+          <i class="fas fa-fist-raised"></i>
+          <div class="class-img-overlay"></div>
+          <span class="class-tag tag-funcional">Funcional</span>
+        </div>
+        <div class="class-body">
+          <h4 class="class-name">Cross Training</h4>
+          <p class="class-desc">Movimientos funcionales variados de alta intensidad. Fuerza, resistencia y agilidad en una sola clase.</p>
+          <div class="class-meta">
+            <span><i class="fas fa-clock"></i> 60 min</span>
+            <span><i class="fas fa-signal"></i> Avanzado</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="class-card fade-up" style="transition-delay:0.3s">
+        <div class="class-img" style="color: #5cb85c">
+          <i class="fas fa-spa"></i>
+          <div class="class-img-overlay"></div>
+          <span class="class-tag tag-yoga">Movilidad</span>
+        </div>
+        <div class="class-body">
+          <h4 class="class-name">Yoga & Stretching</h4>
+          <p class="class-desc">Recuperación activa, movilidad articular y control mental. El balance perfecto para el atleta completo.</p>
+          <div class="class-meta">
+            <span><i class="fas fa-clock"></i> 60 min</span>
+            <span><i class="fas fa-signal"></i> Todos los niveles</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- PLANES -->
+  <section class="plans-section" id="planes">
+    <div class="section-header">
+      <p class="section-eyebrow">Membresías</p>
+      <h2 class="section-title">INVIERTE EN <span class="accent">TI MISMO</span></h2>
+    </div>
+
+    <div class="plans-grid">
+      <!-- Mensual -->
+      <div class="plan-box fade-up">
+        <p class="plan-label">Plan Mensual</p>
+        <div class="plan-price-row">
+          <span class="plan-currency">S/</span>
+          <span class="plan-price">80</span>
+        </div>
+        <p class="plan-period">por mes · sin compromisos</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><i class="fas fa-check"></i> Acceso completo al gym</li>
+          <li><i class="fas fa-check"></i> Evaluación física inicial</li>
+          <li><i class="fas fa-check"></i> Rutina personalizada</li>
+          <li><i class="fas fa-check"></i> Vestuario y duchas</li>
+          <li><i class="fas fa-times" style="color:var(--muted)"></i> <span style="color:var(--muted)">Clases grupales incluidas</span></li>
+          <li><i class="fas fa-times" style="color:var(--muted)"></i> <span style="color:var(--muted)">Nutricionista</span></li>
+        </ul>
+        <button class="btn-plan" onclick="scrollToLogin()">EMPEZAR AHORA</button>
+      </div>
+
+      <!-- Trimestral (featured) -->
+      <div class="plan-box featured fade-up" style="transition-delay:0.1s">
+        <span class="plan-popular">POPULAR</span>
+        <p class="plan-label">Plan Trimestral</p>
+        <div class="plan-price-row">
+          <span class="plan-currency">S/</span>
+          <span class="plan-price">210</span>
+        </div>
+        <p class="plan-period">por 3 meses · ahorras S/ 30</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><i class="fas fa-check"></i> Acceso completo al gym</li>
+          <li><i class="fas fa-check"></i> Evaluación física inicial</li>
+          <li><i class="fas fa-check"></i> Rutina personalizada</li>
+          <li><i class="fas fa-check"></i> Vestuario y duchas</li>
+          <li><i class="fas fa-check"></i> Clases grupales incluidas</li>
+          <li><i class="fas fa-times" style="color:var(--muted)"></i> <span style="color:var(--muted)">Nutricionista</span></li>
+        </ul>
+        <button class="btn-plan featured-btn" onclick="scrollToLogin()">ELEGIR TRIMESTRAL</button>
+      </div>
+
+      <!-- Anual -->
+      <div class="plan-box fade-up" style="transition-delay:0.2s">
+        <p class="plan-label">Plan Anual</p>
+        <div class="plan-price-row">
+          <span class="plan-currency">S/</span>
+          <span class="plan-price">720</span>
+        </div>
+        <p class="plan-period">por año · ahorras S/ 240</p>
+        <div class="plan-divider"></div>
+        <ul class="plan-features">
+          <li><i class="fas fa-check"></i> Acceso completo al gym</li>
+          <li><i class="fas fa-check"></i> Evaluación física inicial</li>
+          <li><i class="fas fa-check"></i> Rutina personalizada</li>
+          <li><i class="fas fa-check"></i> Vestuario y duchas</li>
+          <li><i class="fas fa-check"></i> Clases grupales incluidas</li>
+          <li><i class="fas fa-check"></i> Consulta con nutricionista</li>
+        </ul>
+        <button class="btn-plan" onclick="scrollToLogin()">COMPROMETERSE</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
+
+  <!-- LOGIN / ACCESO -->
+  <section class="login-section" id="acceso">
+    <div class="login-left fade-up">
+      <p class="login-eyebrow">Área de acceso</p>
+      <h2 class="login-title">ENTRA AL<br/><span>TEMPLO</span></h2>
+      <p class="login-desc">
+        Gestiona tu membresía, consulta tus rutinas, revisa tu historial de asistencia y más desde el panel de administración de TemploGym.
+      </p>
+      <div style="margin-top: 40px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px; color: var(--text-muted); font-size: 0.88rem;">
+          <div style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--gold);"><i class="fas fa-shield-alt"></i></div>
+          Acceso seguro con credenciales
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; color: var(--text-muted); font-size: 0.88rem;">
+          <div style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--gold);"><i class="fas fa-chart-line"></i></div>
+          Dashboard con métricas en tiempo real
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; color: var(--text-muted); font-size: 0.88rem;">
+          <div style="width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: var(--gold);"><i class="fas fa-fingerprint"></i></div>
+          Check-in rápido por DNI
+        </div>
+      </div>
+    </div>
+
+    <div class="login-right fade-up" style="transition-delay:0.2s">
+      <div class="login-header">
+        <span class="login-bolt">⚡</span>
+        <div class="login-brand">TEMPLO GYM</div>
+        <div class="login-tagline">SISTEMA DE GESTIÓN</div>
+      </div>
+
+      <div class="login-form">
+        <div class="login-field">
+          <label>Usuario</label>
+          <div class="login-field-wrap">
+            <input type="text" id="loginUser" placeholder="admin" autocomplete="username"/>
+            <i class="fas fa-user"></i>
+          </div>
+        </div>
+
+        <div class="login-field">
+          <label>Contraseña</label>
+          <div class="login-field-wrap">
+            <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"/>
+            <i class="fas fa-lock"></i>
+          </div>
+        </div>
+
+        <a href="#" class="login-forgot">¿Olvidaste tu contraseña?</a>
+
+        <div class="login-error" id="loginError">
+          <i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos.
+        </div>
+
+        <button class="btn-login" id="btnLogin">
+          <i class="fas fa-sign-in-alt"></i> INGRESAR AL SISTEMA
+        </button>
+
+        <p class="login-demo-hint">Demo: usuario <span>admin</span> / contraseña <span>admin123</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="contacto">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">⚡ TEMPLO GYM</div>
+        <p class="footer-brand-desc">El lugar donde la disciplina, la fuerza y la comunidad se unen para crear atletas completos. Tu transformación empieza aquí.</p>
+        <div class="footer-socials">
+          <a href="#" class="footer-social"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="footer-social"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="footer-social"><i class="fab fa-tiktok"></i></a>
+          <a href="#" class="footer-social"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div>
+        <p class="footer-col-title">Navegación</p>
+        <ul class="footer-col-links">
+          <li><a href="#inicio">Inicio</a></li>
+          <li><a href="#nosotros">Nosotros</a></li>
+          <li><a href="#clases">Clases</a></li>
+          <li><a href="#planes">Planes</a></li>
+          <li><a href="#acceso">Acceso Admin</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Horarios</p>
+        <ul class="footer-col-links">
+          <li><a href="#">Lun – Vie: 5AM – 11PM</a></li>
+          <li><a href="#">Sábados: 6AM – 10PM</a></li>
+          <li><a href="#">Domingos: 7AM – 8PM</a></li>
+          <li><a href="#">Feriados: 8AM – 6PM</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Contacto</p>
+        <ul class="footer-col-links">
+          <li><a href="#"><i class="fas fa-map-marker-alt" style="color:var(--gold-dim);margin-right:6px"></i> Surquillo, Lima</a></li>
+          <li><a href="#"><i class="fas fa-phone" style="color:var(--gold-dim);margin-right:6px"></i> +51 987 654 321</a></li>
+          <li><a href="#"><i class="fas fa-envelope" style="color:var(--gold-dim);margin-right:6px"></i> info@templogym.pe</a></li>
+          <li><a href="#"><i class="fab fa-whatsapp" style="color:var(--gold-dim);margin-right:6px"></i> WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2025 <span>TemploGym</span>. Todos los derechos reservados.</p>
+      <p class="footer-copy">Diseñado con <span>⚡</span> en Lima, Perú</p>
+    </div>
+  </footer>
+
+</div>
+<!-- END LANDING -->
+
+
+<!-- ══════════════════════════════════════════
+     ADMIN SYSTEM WRAPPER
+══════════════════════════════════════════ -->
+<div id="adminWrapper">
+  <!-- Topbar de salida -->
+  <div style="
+    position: fixed; top: 0; right: 0; z-index: 9999;
+    padding: 8px 16px;
+    background: rgba(8,8,8,0.95);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    border-left: 1px solid rgba(201,168,76,0.2);
+    border-radius: 0 0 0 10px;
+    display: flex; align-items: center; gap: 12px;
+  ">
+    <span style="font-size: 0.72rem; color: var(--text-muted); font-family: 'Barlow Condensed'; letter-spacing: 1px;">
+      <i class="fas fa-circle" style="color: var(--green); font-size: 7px; margin-right: 5px;"></i>
+      Sesión activa
+    </span>
+    <button id="btnLogout" style="
+      background: transparent;
+      border: 1px solid rgba(224,85,85,0.3);
+      color: #e05555;
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    ">
+      <i class="fas fa-sign-out-alt"></i> SALIR
+    </button>
+  </div>
+
+  <!-- Aquí se carga el sistema de gestión existente via iframe o puedes pegar los archivos -->
+  <!-- Para demo, mostramos un aviso de que el sistema cargó -->
+<iframe 
+  src="admin.html" 
+  style="width:100%; height:100vh; border:none; display:block; margin-top:44px;"
+  id="adminFrame">
+</iframe>
+
+</div>
+
+<script>
+  // ─── LOGIN ───
+  const CREDENTIALS = {
+    admin: 'admin123',
+    templo: 'gym2025'
+  };
+
+  function scrollToLogin() {
+    document.getElementById('acceso').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  document.getElementById('btnLogin').addEventListener('click', doLogin);
+  document.getElementById('loginPass').addEventListener('keypress', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  function doLogin() {
+    const user = document.getElementById('loginUser').value.trim().toLowerCase();
+    const pass = document.getElementById('loginPass').value;
+    const err  = document.getElementById('loginError');
+
+    if (CREDENTIALS[user] && CREDENTIALS[user] === pass) {
+      err.classList.remove('show');
+      // Transición al sistema
+      document.getElementById('landing').style.opacity = '0';
+      document.getElementById('landing').style.transform = 'scale(1.02)';
+      document.getElementById('landing').style.transition = 'all 0.5s ease';
+      setTimeout(() => {
+        document.getElementById('landing').style.display = 'none';
+        document.getElementById('adminWrapper').classList.add('active');
+        document.getElementById('adminWrapper').style.opacity = '0';
+        document.getElementById('adminWrapper').style.transition = 'opacity 0.4s ease';
+        setTimeout(() => {
+          document.getElementById('adminWrapper').style.opacity = '1';
+        }, 50);
+      }, 500);
+    } else {
+      err.classList.add('show');
+      document.getElementById('loginPass').value = '';
+      // Shake animation
+      const form = document.querySelector('.login-right');
+      form.style.animation = 'none';
+      form.style.transform = 'translateX(-8px)';
+      setTimeout(() => form.style.transform = 'translateX(8px)', 80);
+      setTimeout(() => form.style.transform = 'translateX(-5px)', 160);
+      setTimeout(() => form.style.transform = 'translateX(5px)', 240);
+      setTimeout(() => form.style.transform = 'translateX(0)', 320);
+    }
+  }
+
+  // ─── LOGOUT ───
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    document.getElementById('adminWrapper').style.opacity = '0';
+    document.getElementById('adminWrapper').style.transition = 'opacity 0.4s ease';
+    setTimeout(() => {
+      document.getElementById('adminWrapper').classList.remove('active');
+      document.getElementById('landing').style.display = 'flex';
+      document.getElementById('landing').style.opacity = '0';
+      document.getElementById('landing').style.transform = 'scale(0.98)';
+      document.getElementById('landing').style.transition = 'all 0.5s ease';
+      setTimeout(() => {
+        document.getElementById('landing').style.opacity = '1';
+        document.getElementById('landing').style.transform = 'scale(1)';
+      }, 50);
+      document.getElementById('loginUser').value = '';
+      document.getElementById('loginPass').value = '';
+      document.getElementById('loginError').classList.remove('show');
+    }, 400);
+  });
+
+  // ─── SCROLL ANIMATIONS ───
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // ─── ACTIVE NAV ───
+  window.addEventListener('scroll', () => {
+    const sections = ['inicio', 'nosotros', 'clases', 'planes', 'acceso'];
+    const scrollY  = window.scrollY + 100;
+
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.offsetTop <= scrollY && el.offsetTop + el.offsetHeight > scrollY) {
+        document.querySelectorAll('.nav-links a').forEach(a => {
+          a.style.color = a.getAttribute('href') === `#${id}` ? 'var(--gold)' : '';
+        });
+      }
+    });
+  });
+</script>
+</body>
+</html>

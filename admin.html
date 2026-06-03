@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Templo Gym — Sistema de Gestión</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <span class="logo-main">TEMPLO</span>
+        <span class="logo-sub">GYM</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-section="dashboard">
+        <i class="fas fa-chart-line"></i>
+        <span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item" data-section="clientes">
+        <i class="fas fa-users"></i>
+        <span>Clientes</span>
+      </a>
+      <a href="#" class="nav-item" data-section="membresias">
+        <i class="fas fa-id-card"></i>
+        <span>Membresías</span>
+      </a>
+      <a href="#" class="nav-item" data-section="asistencia">
+        <i class="fas fa-clipboard-check"></i>
+        <span>Asistencia</span>
+      </a>
+      <a href="#" class="nav-item" data-section="rutinas">
+        <i class="fas fa-dumbbell"></i>
+        <span>Rutinas</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">A</div>
+        <div>
+          <div class="user-name">Admin</div>
+          <div class="user-role">Administrador</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <h1 class="page-title" id="pageTitle">Dashboard</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Buscar cliente..." id="globalSearch"/>
+        </div>
+        <div class="topbar-date" id="topbarDate"></div>
+      </div>
+    </header>
+
+    <!-- SECTIONS -->
+    <div class="content-wrapper">
+
+      <!-- DASHBOARD -->
+      <section class="section active" id="section-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statClientes">0</div>
+              <div class="stat-label">Clientes Activos</div>
+            </div>
+            <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 12%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon gold"><i class="fas fa-id-card"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statMembresias">0</div>
+              <div class="stat-label">Membresías Vigentes</div>
+            </div>
+            <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 8%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red"><i class="fas fa-door-open"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statAsistencia">0</div>
+              <div class="stat-label">Asistencias Hoy</div>
+            </div>
+            <div class="stat-trend down"><i class="fas fa-arrow-down"></i> 3%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
+            <div class="stat-info">
+              <div class="stat-value" id="statIngresos">S/ 0</div>
+              <div class="stat-label">Ingresos del Mes</div>
+            </div>
+            <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 21%</div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Últimas Asistencias</h3>
+              <span class="badge">Hoy</span>
+            </div>
+            <div class="recent-list" id="recentAsistencia"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h3>Membresías por Vencer</h3>
+              <span class="badge warn">Esta semana</span>
+            </div>
+            <div class="recent-list" id="proximasVencer"></div>
+          </div>
+          <div class="card wide">
+            <div class="card-header">
+              <h3>Clientes Recientes</h3>
+            </div>
+            <div class="recent-list" id="recentClientes"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLIENTES -->
+      <section class="section" id="section-clientes">
+        <div class="section-actions">
+          <button class="btn btn-primary" id="btnNuevoCliente">
+            <i class="fas fa-plus"></i> Nuevo Cliente
+          </button>
+          <input type="text" class="filter-input" placeholder="Filtrar clientes..." id="filterClientes"/>
+        </div>
+        <div class="card">
+          <table class="data-table" id="tablaClientes">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>DNI</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="bodyClientes"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- MEMBRESIAS -->
+      <section class="section" id="section-membresias">
+        <div class="section-actions">
+          <button class="btn btn-primary" id="btnNuevaMembresia">
+            <i class="fas fa-plus"></i> Nueva Membresía
+          </button>
+          <input type="text" class="filter-input" placeholder="Filtrar membresías..." id="filterMembresias"/>
+        </div>
+        <div class="plans-row">
+          <div class="plan-card">
+            <div class="plan-name">Mensual</div>
+            <div class="plan-price">S/ 80</div>
+            <div class="plan-desc">30 días de acceso completo</div>
+          </div>
+          <div class="plan-card featured">
+            <div class="plan-badge">POPULAR</div>
+            <div class="plan-name">Trimestral</div>
+            <div class="plan-price">S/ 210</div>
+            <div class="plan-desc">90 días — ahorra S/ 30</div>
+          </div>
+          <div class="plan-card">
+            <div class="plan-name">Anual</div>
+            <div class="plan-price">S/ 720</div>
+            <div class="plan-desc">365 días — ahorra S/ 240</div>
+          </div>
+        </div>
+        <div class="card">
+          <table class="data-table" id="tablaMembresias">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>Plan</th>
+                <th>Inicio</th>
+                <th>Vencimiento</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="bodyMembresias"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ASISTENCIA -->
+      <section class="section" id="section-asistencia">
+        <div class="checkin-panel">
+          <div class="checkin-box">
+            <div class="checkin-title"><i class="fas fa-fingerprint"></i> Check-In Rápido</div>
+            <input type="text" class="checkin-input" id="checkinDNI" placeholder="Ingresa DNI del cliente..." maxlength="8"/>
+            <button class="btn btn-primary btn-lg" id="btnCheckin">
+              <i class="fas fa-sign-in-alt"></i> Registrar Entrada
+            </button>
+            <div class="checkin-feedback" id="checkinFeedback"></div>
+          </div>
+        </div>
+        <div class="section-actions" style="margin-top:0">
+          <label style="color:var(--muted); font-size:0.85rem;">Filtrar por fecha:</label>
+          <input type="date" class="filter-input" id="filterFecha" style="max-width:200px"/>
+          <button class="btn btn-secondary" id="btnExportAsistencia"><i class="fas fa-download"></i> Exportar</button>
+        </div>
+        <div class="card">
+          <table class="data-table" id="tablaAsistencia">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Cliente</th>
+                <th>DNI</th>
+                <th>Fecha</th>
+                <th>Hora Entrada</th>
+                <th>Estado Membresía</th>
+              </tr>
+            </thead>
+            <tbody id="bodyAsistencia"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- RUTINAS -->
+      <section class="section" id="section-rutinas">
+        <div class="section-actions">
+          <button class="btn btn-primary" id="btnNuevaRutina">
+            <i class="fas fa-plus"></i> Nueva Rutina
+          </button>
+          <input type="text" class="filter-input" placeholder="Filtrar rutinas..." id="filterRutinas"/>
+        </div>
+        <div class="rutinas-grid" id="rutinasGrid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODALES -->
+
+  <!-- Modal Cliente -->
+  <div class="modal-overlay" id="modalCliente">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalClienteTitle">Nuevo Cliente</h2>
+        <button class="modal-close" data-close="modalCliente"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre Completo *</label>
+            <input type="text" id="cNombre" placeholder="Ej: Juan Pérez"/>
+          </div>
+          <div class="form-group">
+            <label>DNI *</label>
+            <input type="text" id="cDNI" placeholder="12345678" maxlength="8"/>
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="text" id="cTelefono" placeholder="987654321"/>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="cEmail" placeholder="correo@email.com"/>
+          </div>
+          <div class="form-group">
+            <label>Fecha de Nacimiento</label>
+            <input type="date" id="cFechaNac"/>
+          </div>
+          <div class="form-group">
+            <label>Género</label>
+            <select id="cGenero">
+              <option value="">Seleccionar</option>
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+              <option value="O">Otro</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>Observaciones</label>
+            <textarea id="cObservaciones" placeholder="Condición médica, objetivos, etc."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modalCliente">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarCliente">Guardar Cliente</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Membresía -->
+  <div class="modal-overlay" id="modalMembresia">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalMembresiaTitle">Nueva Membresía</h2>
+        <button class="modal-close" data-close="modalMembresia"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Cliente *</label>
+            <select id="mCliente"></select>
+          </div>
+          <div class="form-group">
+            <label>Plan *</label>
+            <select id="mPlan">
+              <option value="Mensual|80|30">Mensual — S/ 80</option>
+              <option value="Trimestral|210|90">Trimestral — S/ 210</option>
+              <option value="Anual|720|365">Anual — S/ 720</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Fecha de Inicio *</label>
+            <input type="date" id="mFechaInicio"/>
+          </div>
+          <div class="form-group">
+            <label>Monto Pagado (S/)</label>
+            <input type="number" id="mMonto" placeholder="0.00"/>
+          </div>
+          <div class="form-group">
+            <label>Método de Pago</label>
+            <select id="mPago">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Yape">Yape</option>
+              <option value="Plin">Plin</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modalMembresia">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarMembresia">Guardar Membresía</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Rutina -->
+  <div class="modal-overlay" id="modalRutina">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2 id="modalRutinaTitle">Nueva Rutina</h2>
+        <button class="modal-close" data-close="modalRutina"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nombre de Rutina *</label>
+            <input type="text" id="rNombre" placeholder="Ej: Fuerza Upper Body"/>
+          </div>
+          <div class="form-group">
+            <label>Asignar a Cliente</label>
+            <select id="rCliente"><option value="">Sin asignar</option></select>
+          </div>
+          <div class="form-group">
+            <label>Nivel</label>
+            <select id="rNivel">
+              <option value="Principiante">Principiante</option>
+              <option value="Intermedio">Intermedio</option>
+              <option value="Avanzado">Avanzado</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Días por semana</label>
+            <input type="number" id="rDias" min="1" max="7" value="3"/>
+          </div>
+          <div class="form-group full">
+            <label>Objetivo</label>
+            <input type="text" id="rObjetivo" placeholder="Ej: Hipertrofia muscular, pérdida de peso..."/>
+          </div>
+          <div class="form-group full">
+            <label>Ejercicios <small>(uno por línea: Ejercicio | Series x Reps)</small></label>
+            <textarea id="rEjercicios" rows="6" placeholder="Press de Banca | 4x10&#10;Sentadilla | 4x8&#10;Peso Muerto | 3x6"></textarea>
+          </div>
+          <div class="form-group full">
+            <label>Notas del Entrenador</label>
+            <textarea id="rNotas" placeholder="Indicaciones especiales, progresión, etc."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-close="modalRutina">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarRutina">Guardar Rutina</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
