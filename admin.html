@@ -3,133 +3,141 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Templo Gym — Sistema de Gestión</title>
-  <link rel="stylesheet" href="styles.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Panel — Templo Gym</title>
+  <script src="auth.js"></script>
+  <script>TG_AUTH.requireSession();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" href="styles.css" />
 </head>
-<body>
+<body class="admin-body">
 
   <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar" id="sidebar" aria-label="Menú principal">
     <div class="sidebar-logo">
-      <div class="logo-icon">⚡</div>
-      <div class="logo-text">
-        <span class="logo-main">TEMPLO</span>
-        <span class="logo-sub">GYM</span>
-      </div>
+      <a href="admin.html" class="brand" aria-label="Templo Gym — inicio del panel">
+        <span class="brand-mark" aria-hidden="true"><i class="fas fa-bolt"></i></span>
+        <span class="brand-text">
+          <span class="brand-main">TEMPLO</span>
+          <span class="brand-sub">Gym</span>
+        </span>
+      </a>
     </div>
 
     <nav class="sidebar-nav">
-      <a href="#" class="nav-item active" data-section="dashboard">
-        <i class="fas fa-chart-line"></i>
-        <span>Dashboard</span>
+      <span class="nav-label">Gestión</span>
+      <a href="#dashboard" class="nav-item active" data-section="dashboard">
+        <i class="fas fa-chart-line" aria-hidden="true"></i><span>Dashboard</span>
       </a>
-      <a href="#" class="nav-item" data-section="clientes">
-        <i class="fas fa-users"></i>
-        <span>Clientes</span>
+      <a href="#clientes" class="nav-item" data-section="clientes">
+        <i class="fas fa-users" aria-hidden="true"></i><span>Clientes</span>
       </a>
-      <a href="#" class="nav-item" data-section="membresias">
-        <i class="fas fa-id-card"></i>
-        <span>Membresías</span>
+      <a href="#membresias" class="nav-item" data-section="membresias">
+        <i class="fas fa-id-card" aria-hidden="true"></i><span>Membresías</span>
       </a>
-      <a href="#" class="nav-item" data-section="asistencia">
-        <i class="fas fa-clipboard-check"></i>
-        <span>Asistencia</span>
+      <a href="#asistencia" class="nav-item" data-section="asistencia">
+        <i class="fas fa-clipboard-check" aria-hidden="true"></i><span>Asistencia</span>
       </a>
-      <a href="#" class="nav-item" data-section="rutinas">
-        <i class="fas fa-dumbbell"></i>
-        <span>Rutinas</span>
+      <a href="#rutinas" class="nav-item" data-section="rutinas">
+        <i class="fas fa-dumbbell" aria-hidden="true"></i><span>Rutinas</span>
       </a>
     </nav>
 
     <div class="sidebar-footer">
       <div class="user-info">
-        <div class="user-avatar">A</div>
+        <div class="user-avatar" id="userAvatar" aria-hidden="true">A</div>
         <div>
-          <div class="user-name">Admin</div>
-          <div class="user-role">Administrador</div>
+          <div class="user-name" id="userName">Admin</div>
+          <div class="user-role" id="userRole">Administrador</div>
         </div>
       </div>
+      <button class="btn btn-ghost btn-sm btn-block" id="btnLogout">
+        <i class="fas fa-arrow-right-from-bracket" aria-hidden="true"></i> Cerrar sesión
+      </button>
     </div>
   </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <main class="main-content">
 
-    <!-- TOPBAR -->
     <header class="topbar">
       <div class="topbar-left">
-        <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-controls="sidebar" aria-expanded="false">
+          <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
         <h1 class="page-title" id="pageTitle">Dashboard</h1>
       </div>
       <div class="topbar-right">
-        <div class="search-box">
-          <i class="fas fa-search"></i>
-          <input type="text" placeholder="Buscar cliente..." id="globalSearch"/>
-        </div>
+        <label class="search-box">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <span class="sr-only">Buscar cliente</span>
+          <input type="search" placeholder="Buscar cliente..." id="globalSearch"/>
+        </label>
         <div class="topbar-date" id="topbarDate"></div>
       </div>
     </header>
 
-    <!-- SECTIONS -->
     <div class="content-wrapper">
 
       <!-- DASHBOARD -->
-      <section class="section active" id="section-dashboard">
+      <section class="section active" id="section-dashboard" aria-labelledby="pageTitle">
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-users"></i></div>
-            <div class="stat-info">
-              <div class="stat-value" id="statClientes">0</div>
-              <div class="stat-label">Clientes Activos</div>
+            <div class="stat-head">
+              <span class="stat-label">Clientes activos</span>
+              <span class="stat-icon" aria-hidden="true"><i class="fas fa-users"></i></span>
             </div>
-            <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 12%</div>
+            <div class="stat-value" id="statClientes">0</div>
+            <div class="stat-foot" id="statClientesFoot">&nbsp;</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon gold"><i class="fas fa-id-card"></i></div>
-            <div class="stat-info">
-              <div class="stat-value" id="statMembresias">0</div>
-              <div class="stat-label">Membresías Vigentes</div>
+            <div class="stat-head">
+              <span class="stat-label">Membresías vigentes</span>
+              <span class="stat-icon green" aria-hidden="true"><i class="fas fa-id-card"></i></span>
             </div>
-            <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 8%</div>
+            <div class="stat-value" id="statMembresias">0</div>
+            <div class="stat-foot" id="statMembresiasFoot">&nbsp;</div>
           </div>
           <div class="stat-card">
-            <div class="stat-icon red"><i class="fas fa-door-open"></i></div>
-            <div class="stat-info">
-              <div class="stat-value" id="statAsistencia">0</div>
-              <div class="stat-label">Asistencias Hoy</div>
+            <div class="stat-head">
+              <span class="stat-label">Asistencias hoy</span>
+              <span class="stat-icon info" aria-hidden="true"><i class="fas fa-door-open"></i></span>
             </div>
-            <div class="stat-trend down"><i class="fas fa-arrow-down"></i> 3%</div>
+            <div class="stat-value" id="statAsistencia">0</div>
+            <div class="stat-foot" id="statAsistenciaFoot">&nbsp;</div>
           </div>
-          <div class="stat-card">
-            <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
-            <div class="stat-info">
-              <div class="stat-value" id="statIngresos">S/ 0</div>
-              <div class="stat-label">Ingresos del Mes</div>
+          <div class="stat-card featured">
+            <div class="stat-head">
+              <span class="stat-label">Ingresos del mes</span>
+              <span class="stat-icon" aria-hidden="true"><i class="fas fa-coins"></i></span>
             </div>
-            <div class="stat-trend up"><i class="fas fa-arrow-up"></i> 21%</div>
+            <div class="stat-value" id="statIngresos">S/ 0</div>
+            <div class="stat-foot" id="statIngresosFoot">&nbsp;</div>
           </div>
         </div>
 
         <div class="dashboard-grid">
           <div class="card">
             <div class="card-header">
-              <h3>Últimas Asistencias</h3>
-              <span class="badge">Hoy</span>
+              <h2>Últimas asistencias</h2>
+              <span class="pill pill-gold">Recientes</span>
             </div>
             <div class="recent-list" id="recentAsistencia"></div>
           </div>
           <div class="card">
             <div class="card-header">
-              <h3>Membresías por Vencer</h3>
-              <span class="badge warn">Esta semana</span>
+              <h2>Membresías por vencer</h2>
+              <span class="pill pill-warn">Próximos 7 días</span>
             </div>
             <div class="recent-list" id="proximasVencer"></div>
           </div>
           <div class="card wide">
             <div class="card-header">
-              <h3>Clientes Recientes</h3>
+              <h2>Clientes recientes</h2>
             </div>
             <div class="recent-list" id="recentClientes"></div>
           </div>
@@ -137,24 +145,26 @@
       </section>
 
       <!-- CLIENTES -->
-      <section class="section" id="section-clientes">
+      <section class="section" id="section-clientes" aria-labelledby="pageTitle">
         <div class="section-actions">
+          <label class="sr-only" for="filterClientes">Filtrar clientes</label>
+          <input type="search" class="filter-input" placeholder="Filtrar por nombre, DNI o email..." id="filterClientes"/>
+          <span class="spacer"></span>
           <button class="btn btn-primary" id="btnNuevoCliente">
-            <i class="fas fa-plus"></i> Nuevo Cliente
+            <i class="fas fa-plus" aria-hidden="true"></i> Nuevo cliente
           </button>
-          <input type="text" class="filter-input" placeholder="Filtrar clientes..." id="filterClientes"/>
         </div>
-        <div class="card">
+        <div class="card table-wrap">
           <table class="data-table" id="tablaClientes">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Nombre</th>
-                <th>DNI</th>
-                <th>Teléfono</th>
-                <th>Email</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+                <th scope="col">#</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">DNI</th>
+                <th scope="col">Teléfono</th>
+                <th scope="col">Email</th>
+                <th scope="col">Estado</th>
+                <th scope="col"><span class="sr-only">Acciones</span></th>
               </tr>
             </thead>
             <tbody id="bodyClientes"></tbody>
@@ -163,13 +173,7 @@
       </section>
 
       <!-- MEMBRESIAS -->
-      <section class="section" id="section-membresias">
-        <div class="section-actions">
-          <button class="btn btn-primary" id="btnNuevaMembresia">
-            <i class="fas fa-plus"></i> Nueva Membresía
-          </button>
-          <input type="text" class="filter-input" placeholder="Filtrar membresías..." id="filterMembresias"/>
-        </div>
+      <section class="section" id="section-membresias" aria-labelledby="pageTitle">
         <div class="plans-row">
           <div class="plan-card">
             <div class="plan-name">Mensual</div>
@@ -177,7 +181,7 @@
             <div class="plan-desc">30 días de acceso completo</div>
           </div>
           <div class="plan-card featured">
-            <div class="plan-badge">POPULAR</div>
+            <span class="plan-badge">POPULAR</span>
             <div class="plan-name">Trimestral</div>
             <div class="plan-price">S/ 210</div>
             <div class="plan-desc">90 días — ahorra S/ 30</div>
@@ -188,18 +192,26 @@
             <div class="plan-desc">365 días — ahorra S/ 240</div>
           </div>
         </div>
-        <div class="card">
+        <div class="section-actions">
+          <label class="sr-only" for="filterMembresias">Filtrar membresías</label>
+          <input type="search" class="filter-input" placeholder="Filtrar por cliente o plan..." id="filterMembresias"/>
+          <span class="spacer"></span>
+          <button class="btn btn-primary" id="btnNuevaMembresia">
+            <i class="fas fa-plus" aria-hidden="true"></i> Nueva membresía
+          </button>
+        </div>
+        <div class="card table-wrap">
           <table class="data-table" id="tablaMembresias">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Cliente</th>
-                <th>Plan</th>
-                <th>Inicio</th>
-                <th>Vencimiento</th>
-                <th>Monto</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+                <th scope="col">#</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Plan</th>
+                <th scope="col">Inicio</th>
+                <th scope="col">Vencimiento</th>
+                <th scope="col">Monto</th>
+                <th scope="col">Estado</th>
+                <th scope="col"><span class="sr-only">Acciones</span></th>
               </tr>
             </thead>
             <tbody id="bodyMembresias"></tbody>
@@ -208,32 +220,40 @@
       </section>
 
       <!-- ASISTENCIA -->
-      <section class="section" id="section-asistencia">
+      <section class="section" id="section-asistencia" aria-labelledby="pageTitle">
         <div class="checkin-panel">
           <div class="checkin-box">
-            <div class="checkin-title"><i class="fas fa-fingerprint"></i> Check-In Rápido</div>
-            <input type="text" class="checkin-input" id="checkinDNI" placeholder="Ingresa DNI del cliente..." maxlength="8"/>
+            <h2 class="checkin-title"><i class="fas fa-fingerprint" aria-hidden="true"></i> Check-in rápido</h2>
+            <div>
+              <label class="sr-only" for="checkinDNI">DNI del cliente</label>
+              <input type="text" class="checkin-input" id="checkinDNI" placeholder="DNI del cliente" maxlength="8"
+                     inputmode="numeric" pattern="[0-9]{8}" autocomplete="off" aria-describedby="checkinFeedback"/>
+            </div>
             <button class="btn btn-primary btn-lg" id="btnCheckin">
-              <i class="fas fa-sign-in-alt"></i> Registrar Entrada
+              <i class="fas fa-right-to-bracket" aria-hidden="true"></i> Registrar entrada
             </button>
-            <div class="checkin-feedback" id="checkinFeedback"></div>
+            <div class="checkin-feedback" id="checkinFeedback" role="status" aria-live="polite"></div>
           </div>
         </div>
-        <div class="section-actions" style="margin-top:0">
-          <label style="color:var(--muted); font-size:0.85rem;">Filtrar por fecha:</label>
+        <div class="section-actions">
+          <label class="filter-label" for="filterFecha">Filtrar por fecha:</label>
           <input type="date" class="filter-input" id="filterFecha" style="max-width:200px"/>
-          <button class="btn btn-secondary" id="btnExportAsistencia"><i class="fas fa-download"></i> Exportar</button>
+          <button class="btn btn-ghost btn-sm" id="btnLimpiarFecha">Ver todo</button>
+          <span class="spacer"></span>
+          <button class="btn btn-secondary" id="btnExportAsistencia">
+            <i class="fas fa-download" aria-hidden="true"></i> Exportar CSV
+          </button>
         </div>
-        <div class="card">
+        <div class="card table-wrap">
           <table class="data-table" id="tablaAsistencia">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Cliente</th>
-                <th>DNI</th>
-                <th>Fecha</th>
-                <th>Hora Entrada</th>
-                <th>Estado Membresía</th>
+                <th scope="col">#</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">DNI</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Hora</th>
+                <th scope="col">Membresía</th>
               </tr>
             </thead>
             <tbody id="bodyAsistencia"></tbody>
@@ -242,12 +262,14 @@
       </section>
 
       <!-- RUTINAS -->
-      <section class="section" id="section-rutinas">
+      <section class="section" id="section-rutinas" aria-labelledby="pageTitle">
         <div class="section-actions">
+          <label class="sr-only" for="filterRutinas">Filtrar rutinas</label>
+          <input type="search" class="filter-input" placeholder="Filtrar por nombre, nivel u objetivo..." id="filterRutinas"/>
+          <span class="spacer"></span>
           <button class="btn btn-primary" id="btnNuevaRutina">
-            <i class="fas fa-plus"></i> Nueva Rutina
+            <i class="fas fa-plus" aria-hidden="true"></i> Nueva rutina
           </button>
-          <input type="text" class="filter-input" placeholder="Filtrar rutinas..." id="filterRutinas"/>
         </div>
         <div class="rutinas-grid" id="rutinasGrid"></div>
       </section>
@@ -255,39 +277,46 @@
     </div>
   </main>
 
-  <!-- MODALES -->
+  <!-- ═══════════ MODALES ═══════════ -->
 
   <!-- Modal Cliente -->
   <div class="modal-overlay" id="modalCliente">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalClienteTitle">
       <div class="modal-header">
-        <h2 id="modalClienteTitle">Nuevo Cliente</h2>
-        <button class="modal-close" data-close="modalCliente"><i class="fas fa-times"></i></button>
+        <h2 id="modalClienteTitle">Nuevo cliente</h2>
+        <button class="modal-close" data-close="modalCliente" aria-label="Cerrar"><i class="fas fa-xmark" aria-hidden="true"></i></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
-          <div class="form-group">
-            <label>Nombre Completo *</label>
-            <input type="text" id="cNombre" placeholder="Ej: Juan Pérez"/>
+          <div class="form-group full">
+            <label for="cNombre">Nombre completo <span class="req">*</span></label>
+            <input type="text" id="cNombre" placeholder="Ej: Juan Pérez" autocomplete="off"/>
           </div>
           <div class="form-group">
-            <label>DNI *</label>
-            <input type="text" id="cDNI" placeholder="12345678" maxlength="8"/>
+            <label for="cDNI">DNI <span class="req">*</span></label>
+            <input type="text" id="cDNI" placeholder="12345678" maxlength="8" inputmode="numeric" pattern="[0-9]{8}" autocomplete="off"/>
           </div>
           <div class="form-group">
-            <label>Teléfono</label>
-            <input type="text" id="cTelefono" placeholder="987654321"/>
+            <label for="cActivo">Estado</label>
+            <select id="cActivo">
+              <option value="1">Activo</option>
+              <option value="0">Inactivo</option>
+            </select>
           </div>
           <div class="form-group">
-            <label>Email</label>
+            <label for="cTelefono">Teléfono</label>
+            <input type="tel" id="cTelefono" placeholder="987654321" inputmode="tel"/>
+          </div>
+          <div class="form-group">
+            <label for="cEmail">Email</label>
             <input type="email" id="cEmail" placeholder="correo@email.com"/>
           </div>
           <div class="form-group">
-            <label>Fecha de Nacimiento</label>
+            <label for="cFechaNac">Fecha de nacimiento</label>
             <input type="date" id="cFechaNac"/>
           </div>
           <div class="form-group">
-            <label>Género</label>
+            <label for="cGenero">Género</label>
             <select id="cGenero">
               <option value="">Seleccionar</option>
               <option value="M">Masculino</option>
@@ -296,33 +325,33 @@
             </select>
           </div>
           <div class="form-group full">
-            <label>Observaciones</label>
+            <label for="cObservaciones">Observaciones</label>
             <textarea id="cObservaciones" placeholder="Condición médica, objetivos, etc."></textarea>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-close="modalCliente">Cancelar</button>
-        <button class="btn btn-primary" id="btnGuardarCliente">Guardar Cliente</button>
+        <button class="btn btn-ghost" data-close="modalCliente">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarCliente">Guardar cliente</button>
       </div>
     </div>
   </div>
 
   <!-- Modal Membresía -->
   <div class="modal-overlay" id="modalMembresia">
-    <div class="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalMembresiaTitle">
       <div class="modal-header">
-        <h2 id="modalMembresiaTitle">Nueva Membresía</h2>
-        <button class="modal-close" data-close="modalMembresia"><i class="fas fa-times"></i></button>
+        <h2 id="modalMembresiaTitle">Nueva membresía</h2>
+        <button class="modal-close" data-close="modalMembresia" aria-label="Cerrar"><i class="fas fa-xmark" aria-hidden="true"></i></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
           <div class="form-group full">
-            <label>Cliente *</label>
+            <label for="mCliente">Cliente <span class="req">*</span></label>
             <select id="mCliente"></select>
           </div>
           <div class="form-group">
-            <label>Plan *</label>
+            <label for="mPlan">Plan <span class="req">*</span></label>
             <select id="mPlan">
               <option value="Mensual|80|30">Mensual — S/ 80</option>
               <option value="Trimestral|210|90">Trimestral — S/ 210</option>
@@ -330,15 +359,16 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Fecha de Inicio *</label>
-            <input type="date" id="mFechaInicio"/>
+            <label for="mFechaInicio">Fecha de inicio <span class="req">*</span></label>
+            <input type="date" id="mFechaInicio" aria-describedby="mFechaHint"/>
+            <span class="form-hint" id="mFechaHint"></span>
           </div>
           <div class="form-group">
-            <label>Monto Pagado (S/)</label>
-            <input type="number" id="mMonto" placeholder="0.00"/>
+            <label for="mMonto">Monto pagado (S/)</label>
+            <input type="number" id="mMonto" placeholder="0.00" min="0" step="0.01" inputmode="decimal"/>
           </div>
           <div class="form-group">
-            <label>Método de Pago</label>
+            <label for="mPago">Método de pago</label>
             <select id="mPago">
               <option value="Efectivo">Efectivo</option>
               <option value="Yape">Yape</option>
@@ -350,31 +380,31 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-close="modalMembresia">Cancelar</button>
-        <button class="btn btn-primary" id="btnGuardarMembresia">Guardar Membresía</button>
+        <button class="btn btn-ghost" data-close="modalMembresia">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarMembresia">Guardar membresía</button>
       </div>
     </div>
   </div>
 
   <!-- Modal Rutina -->
   <div class="modal-overlay" id="modalRutina">
-    <div class="modal modal-lg">
+    <div class="modal modal-lg" role="dialog" aria-modal="true" aria-labelledby="modalRutinaTitle">
       <div class="modal-header">
-        <h2 id="modalRutinaTitle">Nueva Rutina</h2>
-        <button class="modal-close" data-close="modalRutina"><i class="fas fa-times"></i></button>
+        <h2 id="modalRutinaTitle">Nueva rutina</h2>
+        <button class="modal-close" data-close="modalRutina" aria-label="Cerrar"><i class="fas fa-xmark" aria-hidden="true"></i></button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
           <div class="form-group">
-            <label>Nombre de Rutina *</label>
+            <label for="rNombre">Nombre de la rutina <span class="req">*</span></label>
             <input type="text" id="rNombre" placeholder="Ej: Fuerza Upper Body"/>
           </div>
           <div class="form-group">
-            <label>Asignar a Cliente</label>
+            <label for="rCliente">Asignar a cliente</label>
             <select id="rCliente"><option value="">Sin asignar</option></select>
           </div>
           <div class="form-group">
-            <label>Nivel</label>
+            <label for="rNivel">Nivel</label>
             <select id="rNivel">
               <option value="Principiante">Principiante</option>
               <option value="Intermedio">Intermedio</option>
@@ -382,32 +412,32 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Días por semana</label>
-            <input type="number" id="rDias" min="1" max="7" value="3"/>
+            <label for="rDias">Días por semana</label>
+            <input type="number" id="rDias" min="1" max="7" value="3" inputmode="numeric"/>
           </div>
           <div class="form-group full">
-            <label>Objetivo</label>
+            <label for="rObjetivo">Objetivo</label>
             <input type="text" id="rObjetivo" placeholder="Ej: Hipertrofia muscular, pérdida de peso..."/>
           </div>
           <div class="form-group full">
-            <label>Ejercicios <small>(uno por línea: Ejercicio | Series x Reps)</small></label>
+            <label for="rEjercicios">Ejercicios <small>(uno por línea: Ejercicio | Series x Reps)</small></label>
             <textarea id="rEjercicios" rows="6" placeholder="Press de Banca | 4x10&#10;Sentadilla | 4x8&#10;Peso Muerto | 3x6"></textarea>
           </div>
           <div class="form-group full">
-            <label>Notas del Entrenador</label>
+            <label for="rNotas">Notas del entrenador</label>
             <textarea id="rNotas" placeholder="Indicaciones especiales, progresión, etc."></textarea>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" data-close="modalRutina">Cancelar</button>
-        <button class="btn btn-primary" id="btnGuardarRutina">Guardar Rutina</button>
+        <button class="btn btn-ghost" data-close="modalRutina">Cancelar</button>
+        <button class="btn btn-primary" id="btnGuardarRutina">Guardar rutina</button>
       </div>
     </div>
   </div>
 
   <!-- Toast -->
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="app.js"></script>
 </body>

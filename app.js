@@ -1,23 +1,61 @@
 /* =============================================
    TEMPLO GYM — APP.JS
-   Sistema de Gestión Completo
+   Sistema de Gestión (datos en localStorage)
    ============================================= */
 
 'use strict';
 
 // ─────────────────── STORE (localStorage) ───────────────────
 const DB = {
-  get: (key) => JSON.parse(localStorage.getItem(`tg_${key}`) || '[]'),
-  set: (key, val) => localStorage.setItem(`tg_${key}`, JSON.stringify(val)),
+  get: (key) => {
+    try { return JSON.parse(localStorage.getItem(`tg_${key}`) || '[]'); }
+    catch { return []; }
+  },
+  set: (key, val) => {
+    try { localStorage.setItem(`tg_${key}`, JSON.stringify(val)); }
+    catch { showToast('No se pudo guardar. Revisa el espacio del navegador.', 'error'); }
+  },
   nextId: (key) => {
     const arr = DB.get(key);
     return arr.length ? Math.max(...arr.map(x => x.id)) + 1 : 1;
   }
 };
 
+// ─────────────────── FECHAS (hora local, no UTC) ───────────────────
+const pad = n => String(n).padStart(2, '0');
+
+function toISODate(d) {
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function parseISODate(str) {
+  const [y, m, d] = str.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function addDias(str, n) {
+  const d = parseISODate(str);
+  d.setDate(d.getDate() + n);
+  return toISODate(d);
+}
+
+function diasEntre(desde, hasta) {
+  return Math.round((parseISODate(hasta) - parseISODate(desde)) / 86400000);
+}
+
+function hoy() { return toISODate(new Date()); }
+
+function fmtFecha(str) {
+  if (!str) return '—';
+  const [y, m, d] = str.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 // ─────────────────── SEED DATA (primera vez) ───────────────────
 function seedData() {
   if (DB.get('seeded').length) return;
+
+  const h = hoy();
 
   const clientes = [
     { id:1, nombre:'Carlos Mendoza',  dni:'70123456', telefono:'987001001', email:'carlos@mail.com', genero:'M', fechaNac:'1990-03-15', observaciones:'Sin restricciones', activo:true },
@@ -27,22 +65,18 @@ function seedData() {
     { id:5, nombre:'Rodrigo Puma',    dni:'70567890', telefono:'987005005', email:'rodrigo@mail.com',genero:'M', fechaNac:'1993-06-17', observaciones:'', activo:true },
   ];
 
-  const hoy = new Date();
-  const fmt = d => d.toISOString().split('T')[0];
-  const addDias = (d, n) => { const x = new Date(d); x.setDate(x.getDate()+n); return x; };
-
   const membresias = [
-    { id:1, clienteId:1, plan:'Mensual',    monto:80,  fechaInicio: fmt(addDias(hoy,-20)), fechaFin: fmt(addDias(hoy,10)),  pago:'Efectivo' },
-    { id:2, clienteId:2, plan:'Trimestral', monto:210, fechaInicio: fmt(addDias(hoy,-60)), fechaFin: fmt(addDias(hoy,30)),  pago:'Yape' },
-    { id:3, clienteId:3, plan:'Mensual',    monto:80,  fechaInicio: fmt(addDias(hoy,-28)), fechaFin: fmt(addDias(hoy,2)),   pago:'Efectivo' },
-    { id:4, clienteId:5, plan:'Anual',      monto:720, fechaInicio: fmt(addDias(hoy,-100)),fechaFin: fmt(addDias(hoy,265)), pago:'Transferencia' },
+    { id:1, clienteId:1, plan:'Mensual',    monto:80,  fechaInicio: addDias(h,-20),  fechaFin: addDias(h,10),  fechaPago: addDias(h,-20),  pago:'Efectivo' },
+    { id:2, clienteId:2, plan:'Trimestral', monto:210, fechaInicio: addDias(h,-60),  fechaFin: addDias(h,30),  fechaPago: addDias(h,-60),  pago:'Yape' },
+    { id:3, clienteId:3, plan:'Mensual',    monto:80,  fechaInicio: addDias(h,-28),  fechaFin: addDias(h,2),   fechaPago: addDias(h,-28),  pago:'Efectivo' },
+    { id:4, clienteId:5, plan:'Anual',      monto:720, fechaInicio: addDias(h,-100), fechaFin: addDias(h,265), fechaPago: addDias(h,-100), pago:'Transferencia' },
   ];
 
   const asistencia = [
-    { id:1, clienteId:1, fecha: fmt(hoy), hora:'07:30' },
-    { id:2, clienteId:2, fecha: fmt(hoy), hora:'08:15' },
-    { id:3, clienteId:5, fecha: fmt(hoy), hora:'09:00' },
-    { id:4, clienteId:3, fecha: fmt(addDias(hoy,-1)), hora:'18:45' },
+    { id:1, clienteId:1, fecha: h, hora:'07:30' },
+    { id:2, clienteId:2, fecha: h, hora:'08:15' },
+    { id:3, clienteId:5, fecha: h, hora:'09:00' },
+    { id:4, clienteId:3, fecha: addDias(h,-1), hora:'18:45' },
   ];
 
   const rutinas = [
@@ -66,51 +100,94 @@ function seedData() {
     },
   ];
 
-  DB.set('clientes',  clientes);
+  DB.set('clientes',   clientes);
   DB.set('membresias', membresias);
   DB.set('asistencia', asistencia);
-  DB.set('rutinas',   rutinas);
+  DB.set('rutinas',    rutinas);
   DB.set('seeded', [1]);
 }
 
 // ─────────────────── HELPERS ───────────────────
-function fmtFecha(str) {
-  if (!str) return '—';
-  const [y,m,d] = str.split('-');
-  return `${d}/${m}/${y}`;
+// Escapa texto del usuario antes de insertarlo como HTML
+function esc(v) {
+  return String(v ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 }
 
-function hoy() { return new Date().toISOString().split('T')[0]; }
-
 function inicialDe(nombre) {
-  return nombre ? nombre.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase() : '?';
+  return nombre ? nombre.trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase() : '?';
 }
 
 function getCliente(id) {
   return DB.get('clientes').find(c => c.id === Number(id)) || null;
 }
 
-function membresiaActiva(clienteId) {
-  const hoyStr = hoy();
-  return DB.get('membresias').find(m =>
-    m.clienteId === Number(clienteId) &&
-    m.fechaFin >= hoyStr
-  ) || null;
+function avatar(nombre) {
+  return `<div class="ri-avatar" aria-hidden="true">${esc(inicialDe(nombre))}</div>`;
 }
+
+// Estado de una membresía respecto a una fecha
+function estadoMembresia(m, hoyStr = hoy()) {
+  if (m.fechaInicio > hoyStr) return 'programada';
+  if (m.fechaFin < hoyStr)    return 'vencida';
+  if (m.fechaFin <= addDias(hoyStr, 7)) return 'por-vencer';
+  return 'vigente';
+}
+
+const esVigente = (m, hoyStr) => ['vigente', 'por-vencer'].includes(estadoMembresia(m, hoyStr));
+
+// Membresía vigente hoy (la que termina más tarde, si hay varias)
+function membresiaActiva(clienteId, membresias = DB.get('membresias')) {
+  const hoyStr = hoy();
+  return membresias
+    .filter(m => m.clienteId === Number(clienteId) && esVigente(m, hoyStr))
+    .sort((a, b) => b.fechaFin.localeCompare(a.fechaFin))[0] || null;
+}
+
+// Última fecha cubierta por cualquier membresía del cliente (vigente o programada)
+function ultimaCobertura(clienteId) {
+  const hoyStr = hoy();
+  return DB.get('membresias')
+    .filter(m => m.clienteId === Number(clienteId) && m.fechaFin >= hoyStr)
+    .reduce((max, m) => (m.fechaFin > max ? m.fechaFin : max), '');
+}
+
+const PILL_ESTADO = {
+  'vigente':    '<span class="pill pill-green"><i class="fas fa-circle-check" aria-hidden="true"></i> Vigente</span>',
+  'por-vencer': '<span class="pill pill-warn"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Por vencer</span>',
+  'vencida':    '<span class="pill pill-red"><i class="fas fa-circle-xmark" aria-hidden="true"></i> Vencida</span>',
+  'programada': '<span class="pill pill-info"><i class="fas fa-clock" aria-hidden="true"></i> Programada</span>',
+};
 
 function showToast(msg, tipo = 'success') {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = `toast show ${tipo}`;
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => { t.classList.remove('show'); }, 3000);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+let lastFocus = null;
+
+function openModal(id) {
+  lastFocus = document.activeElement;
+  const overlay = document.getElementById(id);
+  overlay.classList.add('open');
+  const first = overlay.querySelector('.modal-body input, .modal-body select, .modal-body textarea');
+  if (first) setTimeout(() => first.focus(), 50);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  lastFocus?.focus?.();
+}
 
 function emptyState(icon, msg) {
-  return `<div class="empty-state"><i class="${icon}"></i><p>${msg}</p></div>`;
+  return `<div class="empty-state"><i class="${icon}" aria-hidden="true"></i><p>${esc(msg)}</p></div>`;
+}
+
+function marcarInvalido(id, invalido) {
+  document.getElementById(id).setAttribute('aria-invalid', invalido ? 'true' : 'false');
 }
 
 // ─────────────────── NAVEGACIÓN ───────────────────
@@ -122,23 +199,29 @@ const titles = {
   rutinas:    'Rutinas'
 };
 
-let currentSection = 'dashboard';
-
 function navigateTo(sec) {
+  if (!titles[sec]) sec = 'dashboard';
+
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.remove('active');
+    n.removeAttribute('aria-current');
+  });
 
-  const el = document.getElementById(`section-${sec}`);
-  if (el) el.classList.add('active');
+  document.getElementById(`section-${sec}`)?.classList.add('active');
+  const nav = document.querySelector(`.nav-item[data-section="${sec}"]`);
+  if (nav) { nav.classList.add('active'); nav.setAttribute('aria-current', 'page'); }
 
-  const nav = document.querySelector(`[data-section="${sec}"]`);
-  if (nav) nav.classList.add('active');
+  document.getElementById('pageTitle').textContent = titles[sec];
+  document.title = `${titles[sec]} — Templo Gym`;
+  if (location.hash !== `#${sec}`) history.replaceState(null, '', `#${sec}`);
 
-  document.getElementById('pageTitle').textContent = titles[sec] || sec;
-  currentSection = sec;
-
-  // Re-render la sección activa
   renderers[sec]?.();
+}
+
+function setSidebar(open) {
+  document.getElementById('sidebar').classList.toggle('open', open);
+  document.getElementById('menuToggle').setAttribute('aria-expanded', String(open));
 }
 
 // ─────────────────── DASHBOARD ───────────────────
@@ -147,62 +230,79 @@ function renderDashboard() {
   const membresias = DB.get('membresias');
   const asistencia = DB.get('asistencia');
 
-  const hoyStr = hoy();
-  const activos   = clientes.filter(c => c.activo).length;
-  const vigentes  = membresias.filter(m => m.fechaFin >= hoyStr).length;
-  const asistHoy  = asistencia.filter(a => a.fecha === hoyStr).length;
-  const ingresos  = membresias.reduce((s,m) => s + (m.monto||0), 0);
+  const hoyStr  = hoy();
+  const ayerStr = addDias(hoyStr, -1);
+  const mesStr  = hoyStr.slice(0, 7);
 
-  document.getElementById('statClientes').textContent   = activos;
-  document.getElementById('statMembresias').textContent = vigentes;
-  document.getElementById('statAsistencia').textContent = asistHoy;
-  document.getElementById('statIngresos').textContent   = `S/ ${ingresos.toLocaleString()}`;
+  const activos    = clientes.filter(c => c.activo).length;
+  const vigentes   = membresias.filter(m => esVigente(m, hoyStr));
+  const asistHoy   = asistencia.filter(a => a.fecha === hoyStr).length;
+  const asistAyer  = asistencia.filter(a => a.fecha === ayerStr).length;
+  const pagosMes   = membresias.filter(m => (m.fechaPago || m.fechaInicio).startsWith(mesStr));
+  const ingresos   = pagosMes.reduce((s, m) => s + (Number(m.monto) || 0), 0);
+
+  // Por vencer: excluye clientes que ya renovaron (tienen otra membresía que termina después)
+  const porVencer = membresias
+    .filter(m => estadoMembresia(m, hoyStr) === 'por-vencer')
+    .filter(m => !membresias.some(o => o.id !== m.id && o.clienteId === m.clienteId && o.fechaFin > m.fechaFin))
+    .sort((a, b) => a.fechaFin.localeCompare(b.fechaFin));
+
+  const mesNombre = new Date().toLocaleDateString('es-PE', { month: 'long' });
+
+  document.getElementById('statClientes').textContent       = activos;
+  document.getElementById('statClientesFoot').textContent   = `de ${clientes.length} registrados`;
+  document.getElementById('statMembresias').textContent     = vigentes.length;
+  document.getElementById('statMembresiasFoot').textContent = porVencer.length
+    ? `${porVencer.length} vence${porVencer.length !== 1 ? 'n' : ''} esta semana` : 'Ninguna vence esta semana';
+  document.getElementById('statAsistencia').textContent     = asistHoy;
+  document.getElementById('statAsistenciaFoot').textContent = `Ayer: ${asistAyer}`;
+  document.getElementById('statIngresos').textContent       = `S/ ${ingresos.toLocaleString('es-PE')}`;
+  document.getElementById('statIngresosFoot').textContent   = `${pagosMes.length} pago${pagosMes.length !== 1 ? 's' : ''} en ${mesNombre}`;
 
   // Últimas asistencias
-  const ul = asistencia.slice(-5).reverse();
-  const rl = document.getElementById('recentAsistencia');
-  rl.innerHTML = ul.length ? ul.map(a => {
+  const ultimas = [...asistencia]
+    .sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora))
+    .slice(0, 5);
+  document.getElementById('recentAsistencia').innerHTML = ultimas.length ? ultimas.map(a => {
     const c = getCliente(a.clienteId);
+    const cuando = a.fecha === hoyStr ? 'Hoy' : a.fecha === ayerStr ? 'Ayer' : fmtFecha(a.fecha);
     return `<div class="recent-item">
-      <div class="ri-avatar">${inicialDe(c?.nombre||'?')}</div>
+      ${avatar(c?.nombre)}
       <div class="ri-info">
-        <div class="ri-name">${c?.nombre||'Desconocido'}</div>
-        <div class="ri-sub">DNI: ${c?.dni||'—'}</div>
+        <div class="ri-name">${esc(c?.nombre || 'Cliente eliminado')}</div>
+        <div class="ri-sub">DNI ${esc(c?.dni || '—')}</div>
       </div>
-      <div class="ri-extra">${fmtFecha(a.fecha)}<br/>${a.hora}</div>
+      <div class="ri-extra">${cuando}<br/>${esc(a.hora)}</div>
     </div>`;
-  }).join('') : emptyState('fas fa-door-open','Sin asistencias hoy');
+  }).join('') : emptyState('fas fa-door-open', 'Sin asistencias registradas');
 
-  // Membresías por vencer (próximos 7 días)
-  const enSiete = new Date(); enSiete.setDate(enSiete.getDate()+7);
-  const enSieteStr = enSiete.toISOString().split('T')[0];
-  const porVencer = membresias.filter(m => m.fechaFin >= hoyStr && m.fechaFin <= enSieteStr);
-  const pv = document.getElementById('proximasVencer');
-  pv.innerHTML = porVencer.length ? porVencer.map(m => {
+  // Membresías por vencer
+  document.getElementById('proximasVencer').innerHTML = porVencer.length ? porVencer.map(m => {
     const c = getCliente(m.clienteId);
-    const diff = Math.ceil((new Date(m.fechaFin) - new Date(hoyStr)) / 86400000);
+    const diff = diasEntre(hoyStr, m.fechaFin);
+    const texto = diff === 0 ? 'Vence hoy' : `Vence en<br/>${diff} día${diff !== 1 ? 's' : ''}`;
     return `<div class="recent-item">
-      <div class="ri-avatar">${inicialDe(c?.nombre||'?')}</div>
+      ${avatar(c?.nombre)}
       <div class="ri-info">
-        <div class="ri-name">${c?.nombre||'—'}</div>
-        <div class="ri-sub">${m.plan}</div>
+        <div class="ri-name">${esc(c?.nombre || '—')}</div>
+        <div class="ri-sub">${esc(m.plan)} · ${esc(c?.telefono || 'sin teléfono')}</div>
       </div>
-      <div class="ri-extra" style="color:var(--warn)">Vence en<br/>${diff} día${diff!==1?'s':''}</div>
+      <div class="ri-extra warn">${texto}</div>
     </div>`;
-  }).join('') : emptyState('fas fa-id-card','Ninguna vence esta semana');
+  }).join('') : emptyState('fas fa-id-card', 'Ninguna vence esta semana');
 
   // Clientes recientes
   const rc = clientes.slice(-5).reverse();
   document.getElementById('recentClientes').innerHTML = rc.length ? rc.map(c => `
     <div class="recent-item">
-      <div class="ri-avatar">${inicialDe(c.nombre)}</div>
+      ${avatar(c.nombre)}
       <div class="ri-info">
-        <div class="ri-name">${c.nombre}</div>
-        <div class="ri-sub">${c.email||c.telefono||'—'}</div>
+        <div class="ri-name">${esc(c.nombre)}</div>
+        <div class="ri-sub">${esc(c.email || c.telefono || '—')}</div>
       </div>
       <div class="ri-extra">${c.activo ? '<span class="pill pill-green">Activo</span>' : '<span class="pill pill-muted">Inactivo</span>'}</div>
     </div>
-  `).join('') : emptyState('fas fa-users','Sin clientes aún');
+  `).join('') : emptyState('fas fa-users', 'Sin clientes aún');
 }
 
 // ─────────────────── CLIENTES ───────────────────
@@ -215,107 +315,121 @@ function renderClientes(filter = '') {
     data = data.filter(c =>
       c.nombre.toLowerCase().includes(f) ||
       c.dni.includes(f) ||
-      (c.email||'').toLowerCase().includes(f)
+      (c.email || '').toLowerCase().includes(f)
     );
   }
 
   const tbody = document.getElementById('bodyClientes');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="7">${emptyState('fas fa-users','Sin clientes registrados')}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7">${emptyState('fas fa-users', filter ? 'Ningún cliente coincide con la búsqueda' : 'Sin clientes registrados')}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = data.map((c, i) => `
     <tr>
-      <td style="color:var(--text-muted)">${i+1}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="ri-avatar" style="width:32px;height:32px;font-size:12px">${inicialDe(c.nombre)}</div>
-          <strong>${c.nombre}</strong>
-        </div>
-      </td>
-      <td style="font-family:'Barlow Condensed';letter-spacing:1px">${c.dni}</td>
-      <td>${c.telefono||'—'}</td>
-      <td>${c.email||'—'}</td>
+      <td class="muted num">${i + 1}</td>
+      <td><div class="cell-user">${avatar(c.nombre)}<strong>${esc(c.nombre)}</strong></div></td>
+      <td class="mono">${esc(c.dni)}</td>
+      <td class="mono">${esc(c.telefono || '—')}</td>
+      <td>${esc(c.email || '—')}</td>
       <td>${c.activo
-        ? '<span class="pill pill-green"><i class="fas fa-circle" style="font-size:6px"></i> Activo</span>'
-        : '<span class="pill pill-muted"><i class="fas fa-circle" style="font-size:6px"></i> Inactivo</span>'
+        ? '<span class="pill pill-green"><i class="fas fa-circle" aria-hidden="true"></i> Activo</span>'
+        : '<span class="pill pill-muted"><i class="fas fa-circle" aria-hidden="true"></i> Inactivo</span>'
       }</td>
       <td>
         <div class="action-btns">
-          <button class="btn btn-sm btn-secondary" onclick="editCliente(${c.id})"><i class="fas fa-pen"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="deleteCliente(${c.id})"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-sm btn-secondary btn-icon" data-action="edit-cliente" data-id="${c.id}" aria-label="Editar ${esc(c.nombre)}"><i class="fas fa-pen" aria-hidden="true"></i></button>
+          <button class="btn btn-sm btn-danger btn-icon" data-action="delete-cliente" data-id="${c.id}" aria-label="Eliminar ${esc(c.nombre)}"><i class="fas fa-trash" aria-hidden="true"></i></button>
         </div>
       </td>
     </tr>
   `).join('');
 }
 
-window.editCliente = function(id) {
+function editCliente(id) {
   const c = getCliente(id);
   if (!c) return;
-  editingClienteId = id;
-  document.getElementById('modalClienteTitle').textContent = 'Editar Cliente';
-  document.getElementById('cNombre').value       = c.nombre;
-  document.getElementById('cDNI').value          = c.dni;
-  document.getElementById('cTelefono').value     = c.telefono||'';
-  document.getElementById('cEmail').value        = c.email||'';
-  document.getElementById('cFechaNac').value     = c.fechaNac||'';
-  document.getElementById('cGenero').value       = c.genero||'';
-  document.getElementById('cObservaciones').value= c.observaciones||'';
+  editingClienteId = c.id;
+  document.getElementById('modalClienteTitle').textContent = 'Editar cliente';
+  document.getElementById('cNombre').value        = c.nombre;
+  document.getElementById('cDNI').value           = c.dni;
+  document.getElementById('cActivo').value        = c.activo ? '1' : '0';
+  document.getElementById('cTelefono').value      = c.telefono || '';
+  document.getElementById('cEmail').value         = c.email || '';
+  document.getElementById('cFechaNac').value      = c.fechaNac || '';
+  document.getElementById('cGenero').value        = c.genero || '';
+  document.getElementById('cObservaciones').value = c.observaciones || '';
+  ['cNombre', 'cDNI', 'cEmail'].forEach(f => marcarInvalido(f, false));
   openModal('modalCliente');
-};
+}
 
-window.deleteCliente = function(id) {
-  if (!confirm('¿Eliminar este cliente?')) return;
-  let data = DB.get('clientes').filter(c => c.id !== id);
-  DB.set('clientes', data);
-  renderClientes();
-  renderDashboard();
+function deleteCliente(id) {
+  const c = getCliente(id);
+  if (!c) return;
+
+  const membresias = DB.get('membresias');
+  const asistencia = DB.get('asistencia');
+  const nMem  = membresias.filter(m => m.clienteId === id).length;
+  const nAsis = asistencia.filter(a => a.clienteId === id).length;
+
+  let msg = `¿Eliminar a ${c.nombre}?`;
+  if (nMem || nAsis) {
+    msg += `\n\nTambién se borrarán ${nMem} membresía(s) y ${nAsis} registro(s) de asistencia.` +
+           `\nSi solo dejó de venir, mejor edítalo y márcalo como "Inactivo".`;
+  }
+  if (!confirm(msg)) return;
+
+  DB.set('clientes',   DB.get('clientes').filter(x => x.id !== id));
+  DB.set('membresias', membresias.filter(m => m.clienteId !== id));
+  DB.set('asistencia', asistencia.filter(a => a.clienteId !== id));
+  DB.set('rutinas',    DB.get('rutinas').map(r => r.clienteId === id ? { ...r, clienteId: 0 } : r));
+
+  renderClientes(document.getElementById('filterClientes').value);
+  populateClienteSelects();
   showToast('Cliente eliminado', 'warn');
-};
+}
 
 function saveCliente() {
   const nombre = document.getElementById('cNombre').value.trim();
   const dni    = document.getElementById('cDNI').value.trim();
-  if (!nombre || !dni) return showToast('Nombre y DNI son requeridos', 'error');
-  if (dni.length !== 8) return showToast('DNI debe tener 8 dígitos', 'error');
+  const emailEl = document.getElementById('cEmail');
+
+  marcarInvalido('cNombre', !nombre);
+  marcarInvalido('cDNI', !/^\d{8}$/.test(dni));
+  marcarInvalido('cEmail', !emailEl.checkValidity());
+
+  if (!nombre || !dni) return showToast('Nombre y DNI son obligatorios', 'error');
+  if (!/^\d{8}$/.test(dni)) return showToast('El DNI debe tener 8 dígitos numéricos', 'error');
+  if (!emailEl.checkValidity()) return showToast('El email no es válido', 'error');
 
   const data = DB.get('clientes');
+  if (data.some(c => c.dni === dni && c.id !== editingClienteId)) {
+    marcarInvalido('cDNI', true);
+    return showToast('Ya existe un cliente con ese DNI', 'error');
+  }
+
+  const campos = {
+    nombre, dni,
+    activo:   document.getElementById('cActivo').value === '1',
+    telefono: document.getElementById('cTelefono').value.trim(),
+    email:    emailEl.value.trim(),
+    fechaNac: document.getElementById('cFechaNac').value,
+    genero:   document.getElementById('cGenero').value,
+    observaciones: document.getElementById('cObservaciones').value.trim(),
+  };
 
   if (editingClienteId) {
     const idx = data.findIndex(c => c.id === editingClienteId);
-    if (idx > -1) {
-      data[idx] = { ...data[idx],
-        nombre, dni,
-        telefono: document.getElementById('cTelefono').value.trim(),
-        email:    document.getElementById('cEmail').value.trim(),
-        fechaNac: document.getElementById('cFechaNac').value,
-        genero:   document.getElementById('cGenero').value,
-        observaciones: document.getElementById('cObservaciones').value.trim(),
-      };
-    }
-    showToast('Cliente actualizado ✓');
+    if (idx > -1) data[idx] = { ...data[idx], ...campos };
+    showToast('Cliente actualizado');
   } else {
-    // Verificar DNI único
-    if (data.find(c => c.dni === dni)) return showToast('Ya existe un cliente con ese DNI', 'error');
-    data.push({
-      id: DB.nextId('clientes'),
-      nombre, dni,
-      telefono: document.getElementById('cTelefono').value.trim(),
-      email:    document.getElementById('cEmail').value.trim(),
-      fechaNac: document.getElementById('cFechaNac').value,
-      genero:   document.getElementById('cGenero').value,
-      observaciones: document.getElementById('cObservaciones').value.trim(),
-      activo: true
-    });
-    showToast('Cliente registrado ✓');
+    data.push({ id: DB.nextId('clientes'), ...campos });
+    showToast('Cliente registrado');
   }
 
   DB.set('clientes', data);
   closeModal('modalCliente');
-  renderClientes();
-  renderDashboard();
+  renderClientes(document.getElementById('filterClientes').value);
   populateClienteSelects();
 }
 
@@ -330,46 +444,35 @@ function renderMembresias(filter = '') {
     const f = filter.toLowerCase();
     data = data.filter(m => {
       const c = getCliente(m.clienteId);
-      return (c?.nombre||'').toLowerCase().includes(f) || m.plan.toLowerCase().includes(f);
+      return (c?.nombre || '').toLowerCase().includes(f) || m.plan.toLowerCase().includes(f);
     });
   }
 
+  // Más recientes primero
+  data = [...data].sort((a, b) => b.fechaInicio.localeCompare(a.fechaInicio));
+
   const tbody = document.getElementById('bodyMembresias');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="8">${emptyState('fas fa-id-card','Sin membresías registradas')}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8">${emptyState('fas fa-id-card', filter ? 'Ninguna membresía coincide con la búsqueda' : 'Sin membresías registradas')}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = data.map((m, i) => {
     const c = getCliente(m.clienteId);
-    const vigente = m.fechaFin >= hoyStr;
-    const enSiete = new Date(hoyStr); enSiete.setDate(enSiete.getDate()+7);
-    const proxVencer = m.fechaFin <= enSiete.toISOString().split('T')[0] && vigente;
-
-    let estadoPill = vigente
-      ? (proxVencer
-          ? '<span class="pill pill-warn">⚠ Por vencer</span>'
-          : '<span class="pill pill-green">Vigente</span>')
-      : '<span class="pill pill-red">Vencida</span>';
-
+    const estado = estadoMembresia(m, hoyStr);
     return `
       <tr>
-        <td style="color:var(--text-muted)">${i+1}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="ri-avatar" style="width:30px;height:30px;font-size:11px">${inicialDe(c?.nombre||'?')}</div>
-            ${c?.nombre||'<em style="color:var(--muted)">Sin cliente</em>'}
-          </div>
-        </td>
-        <td><span class="pill pill-muted">${m.plan}</span></td>
-        <td>${fmtFecha(m.fechaInicio)}</td>
-        <td style="color:${vigente?'var(--text)':'var(--red)'}">${fmtFecha(m.fechaFin)}</td>
-        <td style="color:var(--gold);font-weight:600">S/ ${m.monto}</td>
-        <td>${estadoPill}</td>
+        <td class="muted num">${i + 1}</td>
+        <td><div class="cell-user">${avatar(c?.nombre)}${c ? esc(c.nombre) : '<em class="muted">Sin cliente</em>'}</div></td>
+        <td><span class="pill pill-muted">${esc(m.plan)}</span></td>
+        <td class="mono">${fmtFecha(m.fechaInicio)}</td>
+        <td class="mono ${estado === 'vencida' ? 'danger' : ''}">${fmtFecha(m.fechaFin)}</td>
+        <td class="money">S/ ${esc(m.monto)}</td>
+        <td>${PILL_ESTADO[estado]}</td>
         <td>
           <div class="action-btns">
-            <button class="btn btn-sm btn-secondary" onclick="editMembresia(${m.id})"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-sm btn-danger" onclick="deleteMembresia(${m.id})"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-sm btn-secondary btn-icon" data-action="edit-membresia" data-id="${m.id}" aria-label="Editar membresía"><i class="fas fa-pen" aria-hidden="true"></i></button>
+            <button class="btn btn-sm btn-danger btn-icon" data-action="delete-membresia" data-id="${m.id}" aria-label="Eliminar membresía"><i class="fas fa-trash" aria-hidden="true"></i></button>
           </div>
         </td>
       </tr>
@@ -377,104 +480,111 @@ function renderMembresias(filter = '') {
   }).join('');
 }
 
-window.editMembresia = function(id) {
-  const data = DB.get('membresias');
-  const m = data.find(x => x.id === id);
+// Al crear una membresía, si el cliente ya tiene una vigente, sugiere empezar al día siguiente de su vencimiento
+function sugerirInicio() {
+  const hint = document.getElementById('mFechaHint');
+  if (editingMembresiaId) { hint.textContent = ''; return; }
+
+  const cobertura = ultimaCobertura(document.getElementById('mCliente').value);
+  if (cobertura) {
+    document.getElementById('mFechaInicio').value = addDias(cobertura, 1);
+    hint.textContent = `Renovación: su membresía actual cubre hasta el ${fmtFecha(cobertura)}.`;
+  } else {
+    document.getElementById('mFechaInicio').value = hoy();
+    hint.textContent = '';
+  }
+}
+
+function editMembresia(id) {
+  const m = DB.get('membresias').find(x => x.id === id);
   if (!m) return;
   editingMembresiaId = id;
-  document.getElementById('modalMembresiaTitle').textContent = 'Editar Membresía';
+  populateClienteSelects();
+  document.getElementById('modalMembresiaTitle').textContent = 'Editar membresía';
   document.getElementById('mCliente').value     = m.clienteId;
   document.getElementById('mFechaInicio').value = m.fechaInicio;
   document.getElementById('mMonto').value       = m.monto;
   document.getElementById('mPago').value        = m.pago;
+  document.getElementById('mFechaHint').textContent = '';
 
-  // Seleccionar plan
   const planSel = document.getElementById('mPlan');
-  for (let opt of planSel.options) {
-    if (opt.value.startsWith(m.plan)) { planSel.value = opt.value; break; }
-  }
+  const opt = [...planSel.options].find(o => o.value.split('|')[0] === m.plan);
+  if (opt) planSel.value = opt.value;
 
   openModal('modalMembresia');
-};
+}
 
-window.deleteMembresia = function(id) {
-  if (!confirm('¿Eliminar esta membresía?')) return;
+function deleteMembresia(id) {
+  if (!confirm('¿Eliminar esta membresía? Esta acción no se puede deshacer.')) return;
   DB.set('membresias', DB.get('membresias').filter(m => m.id !== id));
-  renderMembresias();
-  renderDashboard();
+  renderMembresias(document.getElementById('filterMembresias').value);
   showToast('Membresía eliminada', 'warn');
-};
+}
 
 function saveMembresia() {
-  const clienteId  = Number(document.getElementById('mCliente').value);
-  const planVal    = document.getElementById('mPlan').value;
-  const fechaInicio= document.getElementById('mFechaInicio').value;
-  const monto      = parseFloat(document.getElementById('mMonto').value);
+  const clienteId   = Number(document.getElementById('mCliente').value);
+  const planVal     = document.getElementById('mPlan').value;
+  const fechaInicio = document.getElementById('mFechaInicio').value;
+  const monto       = parseFloat(document.getElementById('mMonto').value);
 
-  if (!clienteId || !planVal || !fechaInicio) return showToast('Completa los campos requeridos', 'error');
+  if (!clienteId || !planVal || !fechaInicio) return showToast('Completa los campos obligatorios', 'error');
+  if (!isNaN(monto) && monto < 0) return showToast('El monto no puede ser negativo', 'error');
 
   const [plan, precioBase, dias] = planVal.split('|');
-  const inicio = new Date(fechaInicio);
-  inicio.setDate(inicio.getDate() + Number(dias));
-  const fechaFin = inicio.toISOString().split('T')[0];
+  const fechaFin = addDias(fechaInicio, Number(dias));
+
+  const campos = {
+    clienteId, plan, fechaInicio, fechaFin,
+    monto: isNaN(monto) ? Number(precioBase) : monto,
+    pago:  document.getElementById('mPago').value,
+  };
 
   const data = DB.get('membresias');
 
   if (editingMembresiaId) {
     const idx = data.findIndex(m => m.id === editingMembresiaId);
-    if (idx > -1) {
-      data[idx] = { ...data[idx], clienteId, plan, fechaInicio, fechaFin,
-        monto: isNaN(monto) ? Number(precioBase) : monto,
-        pago: document.getElementById('mPago').value
-      };
-    }
-    showToast('Membresía actualizada ✓');
+    if (idx > -1) data[idx] = { ...data[idx], ...campos };
+    showToast('Membresía actualizada');
   } else {
-    data.push({
-      id: DB.nextId('membresias'),
-      clienteId, plan, fechaInicio, fechaFin,
-      monto: isNaN(monto) ? Number(precioBase) : monto,
-      pago: document.getElementById('mPago').value
-    });
-    showToast('Membresía registrada ✓');
+    data.push({ id: DB.nextId('membresias'), ...campos, fechaPago: hoy() });
+    showToast(`Membresía registrada hasta el ${fmtFecha(fechaFin)}`);
   }
 
   DB.set('membresias', data);
   closeModal('modalMembresia');
-  renderMembresias();
-  renderDashboard();
+  renderMembresias(document.getElementById('filterMembresias').value);
 }
 
 // ─────────────────── ASISTENCIA ───────────────────
+function asistenciaFiltrada(filter) {
+  const data = DB.get('asistencia');
+  return (filter ? data.filter(a => a.fecha === filter) : data)
+    .sort((a, b) => (b.fecha + b.hora).localeCompare(a.fecha + a.hora));
+}
+
 function renderAsistencia(filter = '') {
-  let data = DB.get('asistencia');
-  if (filter) data = data.filter(a => a.fecha === filter);
-  data = [...data].reverse();
+  const data = asistenciaFiltrada(filter);
+  const membresias = DB.get('membresias');
 
   const tbody = document.getElementById('bodyAsistencia');
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="6">${emptyState('fas fa-door-open','Sin registros de asistencia')}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6">${emptyState('fas fa-door-open', filter ? `Sin asistencias el ${fmtFecha(filter)}` : 'Sin registros de asistencia')}</td></tr>`;
     return;
   }
 
   tbody.innerHTML = data.map((a, i) => {
     const c = getCliente(a.clienteId);
-    const mem = membresiaActiva(a.clienteId);
+    const mem = membresiaActiva(a.clienteId, membresias);
     return `
       <tr>
-        <td style="color:var(--text-muted)">${i+1}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:10px">
-            <div class="ri-avatar" style="width:30px;height:30px;font-size:11px">${inicialDe(c?.nombre||'?')}</div>
-            ${c?.nombre||'Desconocido'}
-          </div>
-        </td>
-        <td style="font-family:'Barlow Condensed';letter-spacing:1px">${c?.dni||'—'}</td>
-        <td>${fmtFecha(a.fecha)}</td>
-        <td style="font-size:1rem;font-family:'Barlow Condensed';letter-spacing:1px">${a.hora}</td>
+        <td class="muted num">${i + 1}</td>
+        <td><div class="cell-user">${avatar(c?.nombre)}${esc(c?.nombre || 'Cliente eliminado')}</div></td>
+        <td class="mono">${esc(c?.dni || '—')}</td>
+        <td class="mono">${fmtFecha(a.fecha)}</td>
+        <td class="mono">${esc(a.hora)}</td>
         <td>${mem
-          ? '<span class="pill pill-green">Membresía Vigente</span>'
-          : '<span class="pill pill-red">Sin Membresía</span>'
+          ? '<span class="pill pill-green"><i class="fas fa-circle-check" aria-hidden="true"></i> Vigente</span>'
+          : '<span class="pill pill-red"><i class="fas fa-circle-xmark" aria-hidden="true"></i> Sin membresía</span>'
         }</td>
       </tr>
     `;
@@ -482,70 +592,88 @@ function renderAsistencia(filter = '') {
 }
 
 function checkin() {
-  const dni = document.getElementById('checkinDNI').value.trim();
+  const input = document.getElementById('checkinDNI');
+  const dni = input.value.trim();
   const fb  = document.getElementById('checkinFeedback');
 
-  if (!dni || dni.length !== 8) {
-    fb.innerHTML = '<span class="feedback-err"><i class="fas fa-exclamation-circle"></i> Ingresa un DNI válido (8 dígitos)</span>';
+  if (!/^\d{8}$/.test(dni)) {
+    fb.innerHTML = '<span class="feedback-err"><i class="fas fa-circle-exclamation" aria-hidden="true"></i> Ingresa un DNI válido (8 dígitos)</span>';
     return;
   }
 
   const cliente = DB.get('clientes').find(c => c.dni === dni);
   if (!cliente) {
-    fb.innerHTML = `<span class="feedback-err"><i class="fas fa-times-circle"></i> No se encontró cliente con DNI ${dni}</span>`;
+    fb.innerHTML = `<span class="feedback-err"><i class="fas fa-circle-xmark" aria-hidden="true"></i> No se encontró ningún cliente con DNI ${esc(dni)}</span>`;
     return;
   }
 
   if (!cliente.activo) {
-    fb.innerHTML = `<span class="feedback-warn"><i class="fas fa-exclamation-triangle"></i> ${cliente.nombre} está inactivo</span>`;
+    fb.innerHTML = `<span class="feedback-warn"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i> ${esc(cliente.nombre)} está marcado como inactivo<small>Edita el cliente para reactivarlo.</small></span>`;
     return;
   }
 
-  const mem = membresiaActiva(cliente.id);
-  const now  = new Date();
-  const hora = now.toTimeString().slice(0,5);
-  const fecha= hoy();
-
-  // Evitar doble check-in el mismo día
-  const yaRegistrado = DB.get('asistencia').find(a => a.clienteId === cliente.id && a.fecha === fecha);
-  if (yaRegistrado) {
-    fb.innerHTML = `<span class="feedback-warn"><i class="fas fa-info-circle"></i> ${cliente.nombre} ya registró entrada hoy a las ${yaRegistrado.hora}</span>`;
-    return;
-  }
+  const fecha = hoy();
+  const hora  = new Date().toTimeString().slice(0, 5);
 
   const asistencia = DB.get('asistencia');
+  const yaRegistrado = asistencia.find(a => a.clienteId === cliente.id && a.fecha === fecha);
+  if (yaRegistrado) {
+    fb.innerHTML = `<span class="feedback-warn"><i class="fas fa-circle-info" aria-hidden="true"></i> ${esc(cliente.nombre)} ya registró su entrada hoy a las ${esc(yaRegistrado.hora)}</span>`;
+    input.select();
+    return;
+  }
+
   asistencia.push({ id: DB.nextId('asistencia'), clienteId: cliente.id, fecha, hora });
   DB.set('asistencia', asistencia);
 
-  const memMsg = mem
-    ? `Membresía ${mem.plan} vigente hasta ${fmtFecha(mem.fechaFin)}`
-    : '⚠ Sin membresía activa';
+  const mem = membresiaActiva(cliente.id);
+  if (mem) {
+    const diff = diasEntre(fecha, mem.fechaFin);
+    const aviso = diff <= 7 ? ` — vence en ${diff} día${diff !== 1 ? 's' : ''}` : '';
+    fb.innerHTML = `<span class="${diff <= 7 ? 'feedback-warn' : 'feedback-ok'}">
+      <i class="fas fa-circle-check" aria-hidden="true"></i> Bienvenido, <strong>${esc(cliente.nombre)}</strong> (${hora})
+      <small>Membresía ${esc(mem.plan)} vigente hasta el ${fmtFecha(mem.fechaFin)}${aviso}</small>
+    </span>`;
+  } else {
+    fb.innerHTML = `<span class="feedback-warn">
+      <i class="fas fa-triangle-exclamation" aria-hidden="true"></i> Entrada registrada: <strong>${esc(cliente.nombre)}</strong> (${hora})
+      <small>No tiene membresía vigente. Cobrar o renovar.</small>
+    </span>`;
+  }
 
-  fb.innerHTML = `<span class="feedback-ok">
-    <i class="fas fa-check-circle"></i> ¡Bienvenido, <strong>${cliente.nombre}</strong>! (${hora})<br/>
-    <small style="color:var(--text-muted)">${memMsg}</small>
-  </span>`;
-
-  document.getElementById('checkinDNI').value = '';
+  input.value = '';
+  input.focus();
   renderAsistencia(document.getElementById('filterFecha').value);
-  renderDashboard();
   showToast(`Check-in: ${cliente.nombre}`);
 }
 
+function csvCampo(v) {
+  return `"${String(v ?? '').replace(/"/g, '""')}"`;
+}
+
 function exportAsistencia() {
-  const data = DB.get('asistencia');
-  let csv = 'N°,Cliente,DNI,Fecha,Hora,Estado Membresía\n';
+  const filtro = document.getElementById('filterFecha').value;
+  const data = asistenciaFiltrada(filtro);
+  if (!data.length) return showToast('No hay registros para exportar', 'warn');
+
+  const membresias = DB.get('membresias');
+  const filas = [['N°', 'Cliente', 'DNI', 'Fecha', 'Hora', 'Estado membresía']];
   data.forEach((a, i) => {
     const c = getCliente(a.clienteId);
-    const mem = membresiaActiva(a.clienteId);
-    csv += `${i+1},"${c?.nombre||'?'}","${c?.dni||'?'}",${fmtFecha(a.fecha)},${a.hora},"${mem?'Vigente':'Sin Membresía'}"\n`;
+    const mem = membresiaActiva(a.clienteId, membresias);
+    filas.push([i + 1, c?.nombre || '?', c?.dni || '?', fmtFecha(a.fecha), a.hora, mem ? 'Vigente' : 'Sin membresía']);
   });
+
+  // BOM para que Excel muestre bien las tildes
+  const csv = '﻿' + filas.map(f => f.map(csvCampo).join(',')).join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
-  a.href = url; a.download = `asistencia_templogym_${hoy()}.csv`;
+  a.href = url;
+  a.download = `asistencia_templogym_${filtro || 'completo_' + hoy()}.csv`;
   a.click();
-  showToast('Exportado como CSV ✓');
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast(`Exportados ${data.length} registros`);
 }
 
 // ─────────────────── RUTINAS ───────────────────
@@ -558,111 +686,117 @@ function renderRutinas(filter = '') {
     data = data.filter(r =>
       r.nombre.toLowerCase().includes(f) ||
       r.nivel.toLowerCase().includes(f) ||
-      (r.objetivo||'').toLowerCase().includes(f)
+      (r.objetivo || '').toLowerCase().includes(f)
     );
   }
 
   const grid = document.getElementById('rutinasGrid');
   if (!data.length) {
-    grid.innerHTML = emptyState('fas fa-dumbbell','Sin rutinas registradas');
+    grid.innerHTML = emptyState('fas fa-dumbbell', filter ? 'Ninguna rutina coincide con la búsqueda' : 'Sin rutinas registradas');
     return;
   }
 
   grid.innerHTML = data.map(r => {
     const c = r.clienteId ? getCliente(r.clienteId) : null;
-    const ejercicios = (r.ejercicios||'').split('\n').filter(Boolean);
-    const nivelColor = { Principiante:'pill-green', Intermedio:'pill-warn', Avanzado:'pill-red' }[r.nivel] || 'pill-muted';
+    const ejercicios = (r.ejercicios || '').split('\n').filter(Boolean);
+    const nivelColor = { Principiante: 'pill-green', Intermedio: 'pill-warn', Avanzado: 'pill-red' }[r.nivel] || 'pill-muted';
 
     return `
-      <div class="rutina-card">
-        <div class="rutina-title">${r.nombre}</div>
+      <article class="rutina-card">
+        <h3 class="rutina-title">${esc(r.nombre)}</h3>
         <div class="rutina-meta">
-          <span class="pill ${nivelColor}">${r.nivel}</span>
-          <span class="pill pill-muted"><i class="fas fa-calendar-day"></i> ${r.dias} días/sem</span>
-          ${c ? `<span class="pill pill-muted"><i class="fas fa-user"></i> ${c.nombre.split(' ')[0]}</span>` : '<span class="pill pill-muted">Sin asignar</span>'}
+          <span class="pill ${nivelColor}">${esc(r.nivel)}</span>
+          <span class="pill pill-muted"><i class="fas fa-calendar-day" aria-hidden="true"></i> ${esc(r.dias)} días/sem</span>
+          ${c
+            ? `<span class="pill pill-gold"><i class="fas fa-user" aria-hidden="true"></i> ${esc(c.nombre.split(' ')[0])}</span>`
+            : '<span class="pill pill-muted">Sin asignar</span>'}
         </div>
-        ${r.objetivo ? `<p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:10px">${r.objetivo}</p>` : ''}
+        ${r.objetivo ? `<p class="rutina-goal">${esc(r.objetivo)}</p>` : ''}
         <ul class="rutina-exercises">
-          ${ejercicios.slice(0,5).map(e => {
-            const [nombre, series] = e.split('|').map(x=>x.trim());
-            return `<li>${nombre} ${series ? `<span>${series}</span>` : ''}`;
+          ${ejercicios.slice(0, 5).map(e => {
+            const [nombre, series] = e.split('|').map(x => x.trim());
+            return `<li>${esc(nombre)} ${series ? `<span>${esc(series)}</span>` : ''}</li>`;
           }).join('')}
-          ${ejercicios.length > 5 ? `<li style="color:var(--gold)">+${ejercicios.length-5} más...</li>` : ''}
+          ${ejercicios.length > 5 ? `<li class="more">+${ejercicios.length - 5} más...</li>` : ''}
         </ul>
-        ${r.notas ? `<p style="font-size:0.75rem;color:var(--gold-dim);font-style:italic;margin-bottom:10px">"${r.notas}"</p>` : ''}
+        ${r.notas ? `<p class="rutina-notes">${esc(r.notas)}</p>` : ''}
         <div class="rutina-footer">
-          <span style="font-size:0.75rem;color:var(--text-muted)">${ejercicios.length} ejercicios</span>
+          <span>${ejercicios.length} ejercicios</span>
           <div class="action-btns">
-            <button class="btn btn-sm btn-secondary" onclick="editRutina(${r.id})"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-sm btn-danger" onclick="deleteRutina(${r.id})"><i class="fas fa-trash"></i></button>
+            <button class="btn btn-sm btn-secondary btn-icon" data-action="edit-rutina" data-id="${r.id}" aria-label="Editar rutina ${esc(r.nombre)}"><i class="fas fa-pen" aria-hidden="true"></i></button>
+            <button class="btn btn-sm btn-danger btn-icon" data-action="delete-rutina" data-id="${r.id}" aria-label="Eliminar rutina ${esc(r.nombre)}"><i class="fas fa-trash" aria-hidden="true"></i></button>
           </div>
         </div>
-      </div>
+      </article>
     `;
   }).join('');
 }
 
-window.editRutina = function(id) {
+function editRutina(id) {
   const r = DB.get('rutinas').find(x => x.id === id);
   if (!r) return;
   editingRutinaId = id;
-  document.getElementById('modalRutinaTitle').textContent = 'Editar Rutina';
-  document.getElementById('rNombre').value    = r.nombre;
-  document.getElementById('rCliente').value   = r.clienteId||'';
-  document.getElementById('rNivel').value     = r.nivel;
-  document.getElementById('rDias').value      = r.dias;
-  document.getElementById('rObjetivo').value  = r.objetivo||'';
-  document.getElementById('rEjercicios').value= r.ejercicios||'';
-  document.getElementById('rNotas').value     = r.notas||'';
+  populateClienteSelects();
+  document.getElementById('modalRutinaTitle').textContent = 'Editar rutina';
+  document.getElementById('rNombre').value     = r.nombre;
+  document.getElementById('rCliente').value    = r.clienteId || '';
+  document.getElementById('rNivel').value      = r.nivel;
+  document.getElementById('rDias').value       = r.dias;
+  document.getElementById('rObjetivo').value   = r.objetivo || '';
+  document.getElementById('rEjercicios').value = r.ejercicios || '';
+  document.getElementById('rNotas').value      = r.notas || '';
   openModal('modalRutina');
-};
+}
 
-window.deleteRutina = function(id) {
+function deleteRutina(id) {
   if (!confirm('¿Eliminar esta rutina?')) return;
   DB.set('rutinas', DB.get('rutinas').filter(r => r.id !== id));
-  renderRutinas();
+  renderRutinas(document.getElementById('filterRutinas').value);
   showToast('Rutina eliminada', 'warn');
-};
+}
 
 function saveRutina() {
   const nombre = document.getElementById('rNombre').value.trim();
-  if (!nombre) return showToast('El nombre es requerido', 'error');
+  marcarInvalido('rNombre', !nombre);
+  if (!nombre) return showToast('El nombre es obligatorio', 'error');
+
+  const dias = Math.min(7, Math.max(1, Number(document.getElementById('rDias').value) || 3));
 
   const data = DB.get('rutinas');
   const rutina = {
     nombre,
-    clienteId: Number(document.getElementById('rCliente').value)||0,
-    nivel:     document.getElementById('rNivel').value,
-    dias:      Number(document.getElementById('rDias').value)||3,
-    objetivo:  document.getElementById('rObjetivo').value.trim(),
-    ejercicios:document.getElementById('rEjercicios').value.trim(),
-    notas:     document.getElementById('rNotas').value.trim(),
+    clienteId:  Number(document.getElementById('rCliente').value) || 0,
+    nivel:      document.getElementById('rNivel').value,
+    dias,
+    objetivo:   document.getElementById('rObjetivo').value.trim(),
+    ejercicios: document.getElementById('rEjercicios').value.trim(),
+    notas:      document.getElementById('rNotas').value.trim(),
   };
 
   if (editingRutinaId) {
     const idx = data.findIndex(r => r.id === editingRutinaId);
     if (idx > -1) data[idx] = { ...data[idx], ...rutina };
-    showToast('Rutina actualizada ✓');
+    showToast('Rutina actualizada');
   } else {
     data.push({ id: DB.nextId('rutinas'), ...rutina });
-    showToast('Rutina guardada ✓');
+    showToast('Rutina guardada');
   }
 
   DB.set('rutinas', data);
   closeModal('modalRutina');
-  renderRutinas();
+  renderRutinas(document.getElementById('filterRutinas').value);
 }
 
 // ─────────────────── SELECTS DE CLIENTES ───────────────────
 function populateClienteSelects() {
-  const clientes = DB.get('clientes');
-  const opts = clientes.map(c => `<option value="${c.id}">${c.nombre} — ${c.dni}</option>`).join('');
+  const clientes = [...DB.get('clientes')].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+  const opts = clientes.map(c =>
+    `<option value="${c.id}">${esc(c.nombre)} — ${esc(c.dni)}${c.activo ? '' : ' (inactivo)'}</option>`
+  ).join('');
   document.getElementById('mCliente').innerHTML = opts || '<option value="">Sin clientes</option>';
 
-  const rOpts = `<option value="">Sin asignar</option>` + clientes.map(c =>
-    `<option value="${c.id}">${c.nombre}</option>`
-  ).join('');
-  document.getElementById('rCliente').innerHTML = rOpts;
+  document.getElementById('rCliente').innerHTML = '<option value="">Sin asignar</option>' +
+    clientes.map(c => `<option value="${c.id}">${esc(c.nombre)}</option>`).join('');
 }
 
 // ─────────────────── RENDERERS MAP ───────────────────
@@ -676,89 +810,138 @@ const renderers = {
 
 // ─────────────────── FECHA EN TOPBAR ───────────────────
 function updateDate() {
-  const now = new Date();
-  const opts = { weekday:'long', day:'numeric', month:'long', year:'numeric' };
+  const opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
   document.getElementById('topbarDate').textContent =
-    now.toLocaleDateString('es-PE', opts).toUpperCase();
+    new Date().toLocaleDateString('es-PE', opts).toUpperCase();
 }
 
-// ─────────────────── BÚSQUEDA GLOBAL ───────────────────
-document.getElementById('globalSearch').addEventListener('input', function() {
-  const val = this.value.trim();
-  if (!val) return;
-  navigateTo('clientes');
-  document.getElementById('filterClientes').value = val;
-  renderClientes(val);
-});
+// ─────────────────── SESIÓN ───────────────────
+function renderUsuario() {
+  const s = TG_AUTH.session();
+  if (!s) return;
+  document.getElementById('userName').textContent   = s.nombre;
+  document.getElementById('userRole').textContent   = s.rol;
+  document.getElementById('userAvatar').textContent = inicialDe(s.nombre);
+}
 
 // ─────────────────── EVENT LISTENERS ───────────────────
+const ACCIONES = {
+  'edit-cliente':     editCliente,
+  'delete-cliente':   deleteCliente,
+  'edit-membresia':   editMembresia,
+  'delete-membresia': deleteMembresia,
+  'edit-rutina':      editRutina,
+  'delete-rutina':    deleteRutina,
+};
+
 function initEvents() {
-  // Navegación sidebar
+  // Botones de acción en tablas y tarjetas (delegación)
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-action]');
+    if (btn) ACCIONES[btn.dataset.action]?.(Number(btn.dataset.id));
+  });
+
+  // Navegación
   document.querySelectorAll('.nav-item').forEach(nav => {
     nav.addEventListener('click', e => {
       e.preventDefault();
       navigateTo(nav.dataset.section);
-      // Cerrar sidebar en móvil
-      document.getElementById('sidebar').classList.remove('open');
+      setSidebar(false);
     });
   });
+  window.addEventListener('hashchange', () => navigateTo(location.hash.slice(1)));
 
   // Menú móvil
-  document.getElementById('menuToggle').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('menuToggle').addEventListener('click', () =>
+    setSidebar(!document.getElementById('sidebar').classList.contains('open')));
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => setSidebar(false));
+
+  // Cerrar sesión
+  document.getElementById('btnLogout').addEventListener('click', () => {
+    TG_AUTH.logout();
+    location.href = 'index.html';
   });
 
-  // Cerrar modales
+  // Modales: botones, clic fuera y tecla Escape
   document.querySelectorAll('[data-close]').forEach(btn => {
     btn.addEventListener('click', () => closeModal(btn.dataset.close));
   });
   document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) overlay.classList.remove('open');
-    });
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(overlay.id); });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const abierto = document.querySelector('.modal-overlay.open');
+    if (abierto) closeModal(abierto.id);
+    else setSidebar(false);
+  });
+
+  // Búsqueda global
+  document.getElementById('globalSearch').addEventListener('input', function () {
+    const val = this.value.trim();
+    document.getElementById('filterClientes').value = val;
+    if (val) navigateTo('clientes');
+    else if (document.getElementById('section-clientes').classList.contains('active')) renderClientes();
   });
 
   // ── Clientes ──
   document.getElementById('btnNuevoCliente').addEventListener('click', () => {
     editingClienteId = null;
-    document.getElementById('modalClienteTitle').textContent = 'Nuevo Cliente';
-    document.getElementById('modalCliente').querySelectorAll('input, select, textarea').forEach(el => el.value = '');
+    document.getElementById('modalClienteTitle').textContent = 'Nuevo cliente';
+    document.getElementById('modalCliente').querySelectorAll('input, textarea').forEach(el => {
+      el.value = '';
+      el.removeAttribute('aria-invalid');
+    });
+    document.getElementById('cGenero').value = '';
+    document.getElementById('cActivo').value = '1';
     openModal('modalCliente');
   });
   document.getElementById('btnGuardarCliente').addEventListener('click', saveCliente);
   document.getElementById('filterClientes').addEventListener('input', e => renderClientes(e.target.value));
+  document.getElementById('cDNI').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
 
   // ── Membresías ──
   document.getElementById('btnNuevaMembresia').addEventListener('click', () => {
     editingMembresiaId = null;
-    document.getElementById('modalMembresiaTitle').textContent = 'Nueva Membresía';
-    document.getElementById('mFechaInicio').value = hoy();
-    document.getElementById('mMonto').value = '';
     populateClienteSelects();
+    document.getElementById('modalMembresiaTitle').textContent = 'Nueva membresía';
+    document.getElementById('mPlan').selectedIndex = 0;
+    document.getElementById('mMonto').value = document.getElementById('mPlan').value.split('|')[1];
+    document.getElementById('mPago').selectedIndex = 0;
+    sugerirInicio();
     openModal('modalMembresia');
   });
   document.getElementById('btnGuardarMembresia').addEventListener('click', saveMembresia);
   document.getElementById('filterMembresias').addEventListener('input', e => renderMembresias(e.target.value));
-
-  // Auto-rellenar monto al cambiar plan
-  document.getElementById('mPlan').addEventListener('change', function() {
+  document.getElementById('mCliente').addEventListener('change', sugerirInicio);
+  document.getElementById('mPlan').addEventListener('change', function () {
     const precio = this.value.split('|')[1];
     if (precio) document.getElementById('mMonto').value = precio;
   });
 
   // ── Asistencia ──
   document.getElementById('btnCheckin').addEventListener('click', checkin);
-  document.getElementById('checkinDNI').addEventListener('keypress', e => { if (e.key==='Enter') checkin(); });
+  document.getElementById('checkinDNI').addEventListener('keydown', e => { if (e.key === 'Enter') checkin(); });
+  document.getElementById('checkinDNI').addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); });
   document.getElementById('filterFecha').addEventListener('change', e => renderAsistencia(e.target.value));
+  document.getElementById('btnLimpiarFecha').addEventListener('click', () => {
+    document.getElementById('filterFecha').value = '';
+    renderAsistencia();
+  });
   document.getElementById('btnExportAsistencia').addEventListener('click', exportAsistencia);
 
   // ── Rutinas ──
   document.getElementById('btnNuevaRutina').addEventListener('click', () => {
     editingRutinaId = null;
-    document.getElementById('modalRutinaTitle').textContent = 'Nueva Rutina';
-    document.getElementById('modalRutina').querySelectorAll('input, select, textarea').forEach(el => el.value = '');
-    document.getElementById('rDias').value = '3';
     populateClienteSelects();
+    document.getElementById('modalRutinaTitle').textContent = 'Nueva rutina';
+    document.getElementById('modalRutina').querySelectorAll('input, textarea').forEach(el => {
+      el.value = '';
+      el.removeAttribute('aria-invalid');
+    });
+    document.getElementById('rCliente').value = '';
+    document.getElementById('rNivel').selectedIndex = 0;
+    document.getElementById('rDias').value = '3';
     openModal('modalRutina');
   });
   document.getElementById('btnGuardarRutina').addEventListener('click', saveRutina);
@@ -768,9 +951,10 @@ function initEvents() {
 // ─────────────────── INIT ───────────────────
 document.addEventListener('DOMContentLoaded', () => {
   seedData();
+  renderUsuario();
   populateClienteSelects();
   updateDate();
   setInterval(updateDate, 60000);
   initEvents();
-  navigateTo('dashboard');
+  navigateTo(location.hash.slice(1) || 'dashboard');
 });
